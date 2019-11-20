@@ -55,19 +55,27 @@ int main(int /* argc */, char** /* argv */) {
   OutputResult output = railroadStringFunction(
       railroadIncrementFunction(railroadIncrementFunction(input)));
 
-  int railroadOutput = output.getSuccess().unpack();
-  std::string railroadFailText = output.getFailure().unpack();
+  if (output.hasSuccess()) {
+    int railroadOutput = output.getSuccess().unpack();
 
-  if (directOutput == railroadOutput) {
-    std::cout << "Successfully bound " << successOnlyFunction << " to get "
-              << railroadOutput << " from " << rawInput << std::endl;
+    if (directOutput == railroadOutput) {
+      std::cout << "Successfully bound " << successOnlyFunction << " to get "
+                << railroadOutput << " from " << rawInput << std::endl;
+    } else {
+      std::cout << "Binding failed for " << successOnlyFunction << " to get "
+                << railroadOutput << " from " << rawInput << std::endl;
+    }
   } else {
-    std::cout << "Binding failed for " << successOnlyFunction << " to get "
-              << railroadOutput << " from " << rawInput << std::endl;
+    std::cerr << "Output did not calculate happy path." << std::endl;
   }
 
-  std::cout << "Direct fail text: >" << directFailText << "< vs railroad: >"
-            << railroadFailText << "<" << std::endl;
+  if (output.hasFailure()) {
+    std::string railroadFailText = output.getFailure().unpack();
+    std::cout << "Direct fail text: >" << directFailText << "< vs railroad: >"
+              << railroadFailText << "<" << std::endl;
+  } else {
+    std::cout << "No Failure text to report" << std::endl;
+  }
 
   return 0;
 }
