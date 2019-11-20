@@ -14,6 +14,8 @@ auto result =
       >> railroadIncrementFunction)(input);
 ```
 
+The syntax and concept were inspired by [Scott Wlaschin's presentation about the idea in F#](https://fsharpforfunandprofit.com/rop/).
+
 ## Example
 
 ### Code
