@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+add_compile_options(-Og -g)
 add_compile_options(-Wall -Wextra -Wreturn-type)
 add_compile_options(-Werror=return-type)
 
