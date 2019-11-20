@@ -2,6 +2,18 @@
 
 Header-only library for bringing Railway Oriented Programming to C++
 
+## What is it?
+
+Nicer looking function composition that makes it easy to explicitly handle errors
+
+```C++
+auto result =
+    (railroadIncrementFunction
+      >> railroadFromSplit
+      >> railroadIncrementFunction
+      >> railroadIncrementFunction)(input);
+```
+
 ## Example
 
 ### Code
@@ -83,3 +95,11 @@ Got result 3 via syntax composition.
 ```bash
 ~/railroad$ ./compile.bash
 ```
+
+## Open TODOs
+
+See [Github Issues](https://github.com/buckbaskin/railroad/issues) for the latest status
+
+- [ ] `operator>>` for terminations
+- [ ] `operator>>=` for automatic binding of `Callable`
+- [ ] Profiling/Performance Review
