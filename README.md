@@ -1,9 +1,14 @@
-/*
- * main.cpp
- *
- * Copyright 2019 Buck Baskin
- */
+# Railroad
 
+Header-only library for bringing Railway Oriented Programming to C++
+
+## Example
+
+### Code
+
+Based on `src/railroad/main.cpp`
+
+```
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -18,22 +23,6 @@
 class Increment : public ::railroad::abc::Callable1<int, int> {
  public:
   int operator()(const int& input) const override { return input + 1; }
-};
-
-std::ostream& operator<<(std::ostream& out, const Increment& /* inc */) {
-  out << "Increment__function(int) -> int + 1";
-  return out;
-}
-
-class StringWriter
-    : public ::railroad::abc::Callable1<std::string, std::string> {
- public:
-  std::string operator()(const std::string& input) const override {
-    if (input.size() > 0) {
-      return "Hello World";
-    }
-    return input;
-  }
 };
 
 class RangeCheck
@@ -53,9 +42,10 @@ class RangeCheck
   }
 };
 
-int main(int /* argc */, char** /* argv */) {
-  using ::railroad::Result;
-  using InputResult = Result<int, std::string>;
+using namespace ::railroad;
+using InputResult = Result<int, std::string>;
+
+int main() {
 
   int rawInput = 0;
 
@@ -65,15 +55,24 @@ int main(int /* argc */, char** /* argv */) {
   RangeCheck validateAndSplit;
   ::railroad::bind::ValidateSuccess railroadFromSplit(validateAndSplit);
 
-  // clang-format off
   int fancyComposedResult =
       (railroadIncrementFunction
         >> railroadFromSplit
         >> railroadIncrementFunction
         >> railroadIncrementFunction)(InputResult::Success(rawInput)).getSuccess().unpack();
-  // clang-format on
+
   std::cout << "Got result " << fancyComposedResult
             << " via syntax composition." << std::endl;
 
-  return 0;
 }
+```
+
+Output:
+
+```
+Got result 3 via syntax composition.
+```
+
+### Compiling
+
+`./run.bash`
