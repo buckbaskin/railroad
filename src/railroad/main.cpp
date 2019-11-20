@@ -21,22 +21,42 @@ std::ostream& operator<<(std::ostream& out, const Increment& /* inc */) {
   return out;
 }
 
+class StringWriter
+    : public ::railroad::abc::Callable1<std::string, std::string> {
+ public:
+  std::string operator()(const std::string& input) const override {
+    if (input.size() > 0) {
+      return "Hello World";
+    }
+    return input;
+  }
+};
+
 int main(int /* argc */, char** /* argv */) {
   using ::railroad::Result;
   using InputResult = Result<int, std::string>;
   using OutputResult = Result<int, std::string>;
 
   int rawInput = 0;
+  std::string strInput = "";
 
   Increment successOnlyFunction;
   int directOutput = successOnlyFunction(successOnlyFunction(rawInput));
 
-  InputResult input = InputResult::Success(rawInput);
+  StringWriter failureOnlyFunction;
+  std::string directFailText = failureOnlyFunction(strInput);
+
+  InputResult input = InputResult(rawInput, strInput);
+
   ::railroad::bind::SuccessPipe railroadIncrementFunction{successOnlyFunction};
-  OutputResult output =
-      railroadIncrementFunction(railroadIncrementFunction(input));
+  ::railroad::bind::FailurePipe<int, int, std::string, std::string>
+      railroadStringFunction{failureOnlyFunction};
+
+  OutputResult output = railroadStringFunction(
+      railroadIncrementFunction(railroadIncrementFunction(input)));
 
   int railroadOutput = output.getSuccess().unpack();
+  std::string railroadFailText = output.getFailure().unpack();
 
   if (directOutput == railroadOutput) {
     std::cout << "Successfully bound " << successOnlyFunction << " to get "
@@ -45,6 +65,9 @@ int main(int /* argc */, char** /* argv */) {
     std::cout << "Binding failed for " << successOnlyFunction << " to get "
               << railroadOutput << " from " << rawInput << std::endl;
   }
+
+  std::cout << "Direct fail text: >" << directFailText << "< vs railroad: >"
+            << railroadFailText << "<" << std::endl;
 
   return 0;
 }

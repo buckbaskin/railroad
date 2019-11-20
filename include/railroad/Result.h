@@ -40,7 +40,7 @@ class Result {
   }
   static Result<SuccessType, FailureType> Success(const SuccessType& happy) {
     return Success(PartialSuccessResult<SuccessType>{happy},
-            PartialFailureResult<FailureType>{});
+                   PartialFailureResult<FailureType>{});
   }
   static Result<SuccessType, FailureType> Success(
       const SuccessType& happy, const PartialFailureResult<FailureType>& sad) {
@@ -51,9 +51,18 @@ class Result {
       const PartialFailureResult<FailureType>& sad) {
     return {PartialSuccessResult<SuccessType>{}, sad};
   }
+  static Result<SuccessType, FailureType> Failure(
+      const PartialSuccessResult<SuccessType>& happy,
+      const PartialFailureResult<FailureType>& sad) {
+    return {happy, sad};
+  }
   static Result<SuccessType, FailureType> Failure(const FailureType& sad) {
-    return {PartialSuccessResult<SuccessType>{},
-            PartialFailureResult<FailureType>{sad}};
+    return Failure(PartialSuccessResult<SuccessType>{},
+                   PartialFailureResult<FailureType>{sad});
+  }
+  static Result<SuccessType, FailureType> Failure(
+      const PartialSuccessResult<SuccessType>& happy, const FailureType& sad) {
+    return {happy, PartialFailureResult<FailureType>{sad}};
   }
 
  private:

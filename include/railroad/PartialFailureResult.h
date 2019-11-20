@@ -19,7 +19,7 @@ class PartialFailureResult {
       : PartialFailureResult(new FailureType(example)) {}
   explicit PartialFailureResult(FailureType* impl) : impl_(impl) {}
 
-  explicit operator bool() { return static_cast<bool>(impl_); }
+  explicit operator bool() const { return static_cast<bool>(impl_); }
 
   FailureType unpack() const { return *impl_; }
 
