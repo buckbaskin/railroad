@@ -42,7 +42,7 @@ class FailureOnly : public ::railroad::abc::Callable1<
 
 namespace unsafe {
 template <typename InputSuccessType, typename InputFailureType>
-class WithUnsafeSuccessOnly
+class SuccessOnly
     : public ::railroad::abc::Callable1<
           InputSuccessType, Result<InputSuccessType, InputFailureType>> {
  public:
@@ -53,7 +53,7 @@ class WithUnsafeSuccessOnly
 };
 
 template <typename InputSuccessType, typename InputFailureType>
-class WithUnsafeFailureOnly
+class FailureOnly
     : public ::railroad::abc::Callable1<
           InputFailureType, Result<InputSuccessType, InputFailureType>> {
  public:

@@ -13,6 +13,7 @@
 #include "railroad/SuccessPipe.h"
 #include "railroad/ValidateSuccess.h"
 #include "railroad/abc.h"
+#include "railroad/bind.h"
 #include "railroad/terminate.h"
 
 class Increment : public ::railroad::abc::Callable1<int, int> {
@@ -56,60 +57,24 @@ class RangeCheck
 int main(int /* argc */, char** /* argv */) {
   using ::railroad::Result;
   using InputResult = Result<int, std::string>;
-  using OutputResult = Result<int, std::string>;
 
   int rawInput = 0;
-  std::string strInput = "";
 
   Increment successOnlyFunction;
-  int directOutput = successOnlyFunction(successOnlyFunction(rawInput));
-
-  StringWriter failureOnlyFunction;
-  std::string directFailText = failureOnlyFunction(strInput);
+  ::railroad::bind::SuccessPipe railroadIncrementFunction{successOnlyFunction};
 
   RangeCheck validateAndSplit;
-  int inRange = validateAndSplit(0).getSuccess().unpack();
-  std::string outOfRange = validateAndSplit(2).getFailure().unpack();
-
-  InputResult input = InputResult(rawInput, strInput);
-
-  ::railroad::bind::SuccessPipe railroadIncrementFunction{successOnlyFunction};
-  ::railroad::bind::FailurePipe<int, int, std::string, std::string>
-      railroadStringFunction{failureOnlyFunction};
   ::railroad::bind::ValidateSuccess railroadFromSplit(validateAndSplit);
 
-  OutputResult output = railroadFromSplit(railroadStringFunction(
-      railroadIncrementFunction(railroadIncrementFunction(input))));
-
-  ::railroad::terminate::with::SuccessOnly<int, std::string> terminate;
-  std::optional<int> possibleSuccess = terminate(output);
-  if (!possibleSuccess) {
-    std::cout << "Optional Contains no success termination" << std::endl;
-  } else {
-    std::cout << "Optional Contains " << *possibleSuccess << std::endl;
-  }
-
-  if (output.hasSuccess()) {
-    int railroadOutput = output.getSuccess().unpack();
-
-    if (directOutput == railroadOutput) {
-      std::cout << "Successfully bound " << successOnlyFunction << " to get "
-                << railroadOutput << " from " << rawInput << std::endl;
-    } else {
-      std::cout << "Binding failed for " << successOnlyFunction << " to get "
-                << railroadOutput << " from " << rawInput << std::endl;
-    }
-  } else {
-    std::cerr << "Output did not calculate happy path." << std::endl;
-  }
-
-  if (output.hasFailure()) {
-    std::string railroadFailText = output.getFailure().unpack();
-    std::cout << "Direct fail text: >" << outOfRange << "< vs railroad: >"
-              << railroadFailText << "<" << std::endl;
-  } else {
-    std::cout << "No Failure text to report" << std::endl;
-  }
+  // clang-format off
+  int fancyComposedResult =
+      (railroadIncrementFunction
+        >> railroadFromSplit
+        >> railroadIncrementFunction
+        >> railroadIncrementFunction)(InputResult::Success(rawInput)).getSuccess().unpack();
+  // clang-format on
+  std::cout << "Got result " << fancyComposedResult
+            << " via syntax composition." << std::endl;
 
   return 0;
 }
