@@ -1,7 +1,14 @@
 /*
- * Shamelessly borrow useful base classes from Python's abc (Abstract Base
+ * abc.h
+ *
+ * Borrow useful base classes from Python's abc (Abstract Base
  * Classes) module
+ *
+ * Copyright 2019 Buck Baskin
  */
+
+#pragma once
+
 namespace railroad {
 namespace abc {
 template <typename ReturnType>
