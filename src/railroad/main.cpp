@@ -5,11 +5,13 @@
  */
 
 #include <iostream>
+#include <sstream>
 #include <string>
 
 #include "railroad/Result.h"
 #include "railroad/abc.h"
 #include "railroad/bind.h"
+#include "railroad/terminate.h"
 
 class Increment : public ::railroad::abc::Callable1<int, int> {
  public:
@@ -32,6 +34,23 @@ class StringWriter
   }
 };
 
+class RangeCheck
+    : public ::railroad::abc::Callable1<::railroad::Result<int, std::string>,
+                                        int> {
+  using OutputResult = ::railroad::Result<int, std::string>;
+
+ public:
+  OutputResult operator()(const int& input) const override {
+    if (0 <= input && input <= 1) {
+      return OutputResult::Success(input);
+    } else {
+      std::stringstream buf;
+      buf << "Integer Input Out of Range: " << input << " not in [0, 1]";
+      return OutputResult::Failure(buf.str());
+    }
+  }
+};
+
 int main(int /* argc */, char** /* argv */) {
   using ::railroad::Result;
   using InputResult = Result<int, std::string>;
@@ -46,14 +65,27 @@ int main(int /* argc */, char** /* argv */) {
   StringWriter failureOnlyFunction;
   std::string directFailText = failureOnlyFunction(strInput);
 
+  RangeCheck validateAndSplit;
+  int inRange = validateAndSplit(0).getSuccess().unpack();
+  std::string outOfRange = validateAndSplit(2).getFailure().unpack();
+
   InputResult input = InputResult(rawInput, strInput);
 
   ::railroad::bind::SuccessPipe railroadIncrementFunction{successOnlyFunction};
   ::railroad::bind::FailurePipe<int, int, std::string, std::string>
       railroadStringFunction{failureOnlyFunction};
+  ::railroad::bind::ValidateSuccess railroadFromSplit(validateAndSplit);
 
-  OutputResult output = railroadStringFunction(
-      railroadIncrementFunction(railroadIncrementFunction(input)));
+  OutputResult output = railroadFromSplit(railroadStringFunction(
+      railroadIncrementFunction(railroadIncrementFunction(input))));
+
+  ::railroad::terminate::with::SuccessOnly<int, std::string> terminate;
+  std::optional<int> possibleSuccess = terminate(output);
+  if (!possibleSuccess) {
+    std::cout << "Optional Contains no success termination" << std::endl;
+  } else {
+    std::cout << "Optional Contains " << *possibleSuccess << std::endl;
+  }
 
   if (output.hasSuccess()) {
     int railroadOutput = output.getSuccess().unpack();
@@ -71,7 +103,7 @@ int main(int /* argc */, char** /* argv */) {
 
   if (output.hasFailure()) {
     std::string railroadFailText = output.getFailure().unpack();
-    std::cout << "Direct fail text: >" << directFailText << "< vs railroad: >"
+    std::cout << "Direct fail text: >" << outOfRange << "< vs railroad: >"
               << railroadFailText << "<" << std::endl;
   } else {
     std::cout << "No Failure text to report" << std::endl;
