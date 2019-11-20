@@ -8,7 +8,7 @@ Header-only library for bringing Railway Oriented Programming to C++
 
 Based on `src/railroad/main.cpp`
 
-```
+```C++
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -69,10 +69,17 @@ int main() {
 
 Output:
 
-```
+```bash
+~/railroad$ ./run.bash
+[ 50%] Building CXX object CMakeFiles/demonstrator.dir/src/railroad/main.cpp.o
+[100%] Linking CXX executable demonstrator
+[100%] Built target demonstrator
+Got result 3 via syntax composition.
 Got result 3 via syntax composition.
 ```
 
 ### Compiling
 
-`./run.bash`
+```bash
+~/railroad$ ./compile.bash
+```
