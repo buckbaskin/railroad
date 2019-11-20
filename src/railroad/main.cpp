@@ -8,9 +8,11 @@
 #include <sstream>
 #include <string>
 
+#include "railroad/FailurePipe.h"
 #include "railroad/Result.h"
+#include "railroad/SuccessPipe.h"
+#include "railroad/ValidateSuccess.h"
 #include "railroad/abc.h"
-#include "railroad/bind.h"
 #include "railroad/terminate.h"
 
 class Increment : public ::railroad::abc::Callable1<int, int> {
