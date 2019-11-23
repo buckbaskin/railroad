@@ -15,14 +15,30 @@
 
 using ::railroad::Result;
 
-template <typename OutputType,
+template <typename OutputType, typename InputType,
           typename OutputFailureType = ::railroad::DefaultFailure,
-          typename InputType,
-
           typename InputFailureType = ::railroad::DefaultFailure>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 binds(std::function<OutputType(InputType)> nakedFunc) {
+  return [nakedFunc](Result<InputType, InputFailureType> input) {
+    if (input.hasSuccess()) {
+      return Result<OutputType, OutputFailureType>::Success(
+          nakedFunc(input.getSuccess()), input.getFailurePartial());
+    } else {
+      return Result<OutputType, OutputFailureType>::Failure(
+          input.getFailurePartial());
+    }
+  };
+}
+
+template <typename OutputType, typename InputType,
+          typename OutputFailureType = ::railroad::DefaultFailure,
+          typename InputFailureType = ::railroad::DefaultFailure,
+          typename WrappedFunc>
+std::function<
+    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+binds(WrappedFunc nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasSuccess()) {
       return Result<OutputType, OutputFailureType>::Success(
@@ -68,25 +84,25 @@ std::function<OutputType(InputType)> operator>>(
 
 int main(int /* argc */, char** /* argv */) {
   std::function<int(int)> adder = [](int i) { return i + 1; };
-  std::function<int(int)> subtractor = [](int i) { return i - 1; };
+  // std::function<int(int)> subtractor = [](int i) { return i - 1; };
   std::function<std::string(int)> stringify = [](int i) {
     std::stringstream buf;
     buf << i << " ;) ";
     return buf.str();
   };
-  std::cout << "Maybe? " << (adder >> adder >> subtractor >> stringify)(0)
-            << " . Did it work?" << std::endl;
-
-  auto boundAdder = binds(adder);
-  auto boundSubtractor = binds(subtractor);
-  auto boundStringify = binds(stringify);
 
   std::function feed = feedSuccess<int>;
   std::function terminate = terminateUnsafe<std::string>;
 
-  std::cout << "Maybe twice? "
-            << (feed >> boundAdder >> boundAdder >> boundSubtractor >>
-                boundStringify >> terminate)(0)
-            << " . Did it work twice?" << std::endl;
+  // clang-format off
+  std::cout << "Maybe? "
+            << (feed
+              >> binds(adder)
+              >> binds(adder)
+              >> binds<int, int>([](int i) { return i - 1; })
+              >> binds(stringify) >>
+              terminate)(0)
+            << " . Did it work?" << std::endl;
+  // clang-format on
   return 0;
 }
