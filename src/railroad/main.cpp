@@ -8,12 +8,9 @@
 #include <sstream>
 #include <string>
 
-#include "railroad/FailurePipe.h"
+#include "railroad/GenericCompose.h"
 #include "railroad/Result.h"
-#include "railroad/SuccessPipe.h"
-#include "railroad/ValidateSuccess.h"
 #include "railroad/abc.h"
-#include "railroad/bind.h"
 
 class Increment : public ::railroad::abc::Callable1<int, int> {
  public:
@@ -25,14 +22,12 @@ std::ostream& operator<<(std::ostream& out, const Increment& /* inc */) {
   return out;
 }
 
-class StringWriter
-    : public ::railroad::abc::Callable1<std::string, std::string> {
+class Stringify : public ::railroad::abc::Callable1<std::string, int> {
  public:
-  std::string operator()(const std::string& input) const override {
-    if (input.size() > 0) {
-      return "Hello World";
-    }
-    return input;
+  std::string operator()(const int& input) const override {
+    std::stringstream buf;
+    buf << "String Version: " << input;
+    return buf.str();
   }
 };
 
@@ -53,24 +48,19 @@ class RangeCheck
   }
 };
 
-int main(int /* argc */, char** /* argv */) {
-  using ::railroad::Result;
-  using InputResult = Result<int, std::string>;
+using namespace ::railroad::bind::generic;
 
+int main(int /* argc */, char** /* argv */) {
   int rawInput = 0;
 
-  Increment successOnlyFunction;
-  ::railroad::bind::SuccessPipe railroadIncrementFunction{successOnlyFunction};
-
+  Increment intInc;
+  Stringify intToStr;
   RangeCheck validateAndSplit;
-  ::railroad::bind::ValidateSuccess railroadFromSplit(validateAndSplit);
+
+  GenericCompose composed(intInc, intToStr);
 
   // clang-format off
-  int fancyComposedResult =
-      (railroadIncrementFunction
-        >> railroadFromSplit
-        >> railroadIncrementFunction
-        >> railroadIncrementFunction)(InputResult::Success(rawInput)).getSuccess().unpack();
+  std::string fancyComposedResult = composed(rawInput);
   // clang-format on
   std::cout << "Got result " << fancyComposedResult
             << " via syntax composition." << std::endl;
