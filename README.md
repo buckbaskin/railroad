@@ -2,7 +2,7 @@
 
 Header-only library for bringing Railway Oriented Programming to C++
 
-[![Build Status](https://travis-ci.org/buckbaskin/railroad.svg?branch=master)](https://travis-ci.org/buckbaskin/railroad)
+[![Build Status](https://travis-ci.com/buckbaskin/railroad.svg?branch=master)](https://travis-ci.com/buckbaskin/railroad)
 
 ## What is it?
 
