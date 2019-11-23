@@ -17,7 +17,7 @@ int main(int /* argc */, char** /* argv */) {
   std::function<int(int)> adder = [](int i) { return i + 1; };
   std::function<std::string(int)> stringify = [](int i) {
     std::stringstream buf;
-    buf << i << " ;) ";
+    buf << "You can do anything " << i << " time(s)";
     return buf.str();
   };
 
@@ -25,14 +25,14 @@ int main(int /* argc */, char** /* argv */) {
   std::function terminate = ::railroad::helpers::terminateSuccess<std::string>;
 
   // clang-format off
-  std::cout << "Maybe? "
-            << *((feed
+  std::cout << "\">> Composed\" Functions:" << std::endl <<
+           *((feed
               >> binds(adder)
               >> binds(adder)
               >> binds<int, int>([](int i) { return i - 1; })
               >> binds(stringify) >>
-              terminate)(0))
-            << " . Did it work?" << std::endl;
+              terminate)(41))
+            << std::endl;
   // clang-format on
   return 0;
 }
