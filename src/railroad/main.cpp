@@ -11,11 +11,17 @@
 #include "railroad/GenericCompose.h"
 #include "railroad/Result.h"
 #include "railroad/abc.h"
+#include "railroad/bind.h"
 
 class Increment : public ::railroad::abc::Callable1<int, int> {
  public:
   int operator()(const int& input) const override { return input + 1; }
 };
+
+// class Increment : public ::railroad::abc::Callable1<int, int> {
+//  public:
+//   int operator()(const int& input) const override { return input + 1; }
+// };
 
 std::ostream& operator<<(std::ostream& out, const Increment& /* inc */) {
   out << "Increment__function(int) -> int + 1";
@@ -51,24 +57,31 @@ class RangeCheck
 using namespace ::railroad::bind::generic;
 
 int main(int /* argc */, char** /* argv */) {
+  using InputResult = ::railroad::Result<int, ::railroad::DefaultFailure>;
+  using OutputResult =
+      ::railroad::Result<std::string, ::railroad::DefaultFailure>;
+
   int rawInput = 0;
 
   Increment intInc;
   Stringify intToStr;
   RangeCheck validateAndSplit;
 
+  auto boundIntInc = ::railroad::binds(intInc);
+  auto boundIntToStr = ::railroad::binds(intToStr);
+
+  std::cout << "Completed Individual Binding" << std::endl;
+
+  auto intermediate = (boundIntInc >> boundIntToStr);
+
   // clang-format off
-  std::string fancyComposedResult = (
-    intInc
-      >> intInc
-      >> intToStr)(rawInput);
+  auto fancyComposedResult = (
+    intermediate)(InputResult::Success(rawInput));
   // clang-format on
+
+  std::cout << "Printing Result" << std::endl;
   std::cout << "Got result " << fancyComposedResult
             << " via syntax composition." << std::endl;
-
-  ::railroad::Result<int, std::string> r =
-      ::railroad::Result<int, std::string>::Success(1);
-  std::cout << r << std::endl;
 
   return 0;
 }

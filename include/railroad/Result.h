@@ -19,7 +19,7 @@ using result::PartialSuccessResult;
 template <typename SuccessType, typename FailureType>
 class Result {
  public:
-  Result() = delete;
+  Result() = default;
   Result(const PartialSuccessResult<SuccessType>& success,
          const PartialFailureResult<FailureType>& failure)
       : success_(success), failure_(failure) {}

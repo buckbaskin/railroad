@@ -34,7 +34,7 @@ class PartialSuccessResult {
 template <typename SuccessType>
 std::ostream& operator<<(std::ostream& out,
                          const PartialSuccessResult<SuccessType>& psr) {
-  out << "dSuccess<>(";
+  out << "Success?<>(";
   if (!static_cast<bool>(psr.impl_)) {
     out << "null";
   } else {

@@ -22,6 +22,7 @@ class GenericCompose
   using OuterCallable = ::railroad::abc::Callable1<OutputType, HiddenType>;
 
  public:
+  GenericCompose() = delete;
   explicit GenericCompose(const InnerCallable& inner,
                           const OuterCallable& outer)
       : inner_(inner), outer_(outer) {}
@@ -41,8 +42,8 @@ class GenericCompose
   }
 
  private:
-  const InnerCallable& inner_;
-  const OuterCallable& outer_;
+  InnerCallable inner_;
+  OuterCallable outer_;
 };
 
 template <typename OutputType, typename HiddenType, typename InputType>
@@ -53,7 +54,7 @@ GenericCompose<OutputType, HiddenType, InputType> operator>>(
     std::cout << "GenericCompose operator>>(Callable inner, Callable outer)"
               << std::endl;
   }
-  return GenericCompose{inner, outer};
+  return GenericCompose<OutputType, HiddenType, InputType>{inner, outer};
 }
 
 }  // namespace generic

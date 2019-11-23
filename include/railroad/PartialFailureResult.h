@@ -8,6 +8,8 @@
 
 #include <memory>
 
+#include "railroad/DefaultFailure.h"
+
 namespace railroad {
 namespace result {
 
@@ -31,10 +33,14 @@ class PartialFailureResult {
   std::shared_ptr<FailureType> impl_;
 };
 
+template <>
+inline PartialFailureResult<DefaultFailure>::PartialFailureResult()
+    : impl_(new ::railroad::DefaultFailure{}) {}
+
 template <typename FailureType>
 std::ostream& operator<<(std::ostream& out,
                          const PartialFailureResult<FailureType>& pfr) {
-  out << "dFailure<>(";
+  out << "Failure?<>(";
   if (!static_cast<bool>(pfr.impl_)) {
     out << "null";
   } else {

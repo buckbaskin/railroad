@@ -1,14 +1,13 @@
 /*
- * SuccessPipe.h
+ * PartialSuccessPipe.h
  *
  * Copyright 2019 Buck Baskin
  */
 
 #pragma once
 
-#include <iostream>
-
 #include "railroad/DefaultFailure.h"
+#include "railroad/PartialSuccessResult.h"
 #include "railroad/Result.h"
 #include "railroad/abc.h"
 
@@ -18,26 +17,22 @@ namespace bind {
 template <typename InputSuccessType, typename OutputSuccessType,
           typename InputFailureType = ::railroad::DefaultFailure,
           typename OutputFailureType = ::railroad::DefaultFailure>
-class SuccessPipe : public ::railroad::abc::Callable1<
-                        Result<OutputSuccessType, OutputFailureType>,
-                        Result<InputSuccessType, InputFailureType>> {
+class PartialSuccessPipe : public ::railroad::abc::Callable1<
+                               Result<OutputSuccessType, OutputFailureType>,
+                               Result<InputSuccessType, InputFailureType>> {
   using Callable =
-      ::railroad::abc::Callable1<OutputSuccessType, InputSuccessType>;
+      ::railroad::abc::Callable1<PartialSuccessResult<OutputSuccessType>,
+                                 PartialSuccessResult<InputSuccessType>>;
 
  public:
-  explicit SuccessPipe(const Callable& impl) : impl_(impl) {
-    std::cout << "SuccessPipe constructed" << std::endl;
-  }
+  explicit PartialSuccessPipe(const Callable& impl) : impl_(impl) {}
 
   virtual Result<OutputSuccessType, OutputFailureType> operator()(
       const Result<InputSuccessType, InputFailureType>& input) const override {
     if (input.hasSuccess()) {
-      std::cout << "SuccessPipe<> input hasSuccess " << input.getSuccess()
-                << std::endl;
       return Result<OutputSuccessType, OutputFailureType>::Success(
-          impl_(input.getSuccess()), input.getFailurePartial());
+          impl_(input.getSuccessPartial()), input.getFailurePartial());
     } else {
-      std::cout << "SuccessPipe<> input isFailing " << std::endl;
       return Result<OutputSuccessType, OutputFailureType>::Failure(
           input.getFailurePartial());
     }
