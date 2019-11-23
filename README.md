@@ -2,6 +2,8 @@
 
 Header-only library for bringing Railway Oriented Programming to C++
 
+[![Build Status](https://travis-ci.org/buckbaskin/railroad.svg?branch=master)](https://travis-ci.org/buckbaskin/railroad)
+
 ## What is it?
 
 Nicer looking function composition that makes it easy to explicitly handle errors
