@@ -9,7 +9,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 add_compile_options(-O0 -g)
 add_compile_options(-Wall -Wextra -Wreturn-type)
-add_compile_options(-Werror=return-type)
+add_compile_options(-Werror)
 
 include_directories(include/)
 
