@@ -2,5 +2,6 @@
 cat runtest.bash
 
 ./compile.bash &&\
-./build/demonstrator
+./build/demonstrator &&\
+./build/BasicTest
 

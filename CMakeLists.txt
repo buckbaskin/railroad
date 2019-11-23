@@ -19,4 +19,5 @@ install(TARGETS demonstrator DESTINATION bin)
 
 if(BUILD_TESTING)
     # ... Make Tests ...
+    add_executable(BasicTest test/railroad/basic.cpp)
 endif()
