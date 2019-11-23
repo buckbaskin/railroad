@@ -82,6 +82,48 @@ std::function<OutputType(InputType)> operator>>(
   return [inner, outer](InputType input) { return outer(inner(input)); };
 }
 
+template <typename OutputType, typename HiddenType, typename InputType,
+          typename OutputFailureType, typename HiddenFailureType,
+          typename InputFailureType>
+std::function<
+    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+operator>>=(std::function<HiddenType(InputType)> inner,
+            std::function<Result<OutputType, OutputFailureType>(
+                Result<HiddenType, HiddenFailureType>)>
+                outer) {
+  auto boundInner = binds(inner);
+  return
+      [boundInner, outer](InputType input) { return outer(boundInner(input)); };
+}
+
+template <typename OutputType, typename HiddenType, typename InputType,
+          typename OutputFailureType = ::railroad::DefaultFailure,
+          typename HiddenFailureType, typename InputFailureType>
+std::function<
+    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+operator>>=(std::function<Result<HiddenType, HiddenFailureType>(
+                Result<InputType, InputFailureType>)>
+                inner,
+            std::function<OutputType(HiddenType)> outer) {
+  auto boundOuter = binds(outer);
+  return [inner, boundOuter](Result<InputType, InputFailureType> input) {
+    return boundOuter(inner(input));
+  };
+}
+
+// template <typename OutputType, typename HiddenType, typename InputType,
+//           typename OutputFailureType = ::railroad::DefaultFailure,
+//           typename InputFailureType = ::railroad::DefaultFailure>
+// std::function<
+//     Result<OutputType, OutputFailureType>(Result<InputType,
+//     InputFailureType>)>
+// operator>>=(std::function<HiddenType(InputType)> inner,
+//             std::function<OutputType(HiddenType)> outer) {
+//   return binds([inner, outer](InputType input) {
+//     return boundOuter(boundInner(input));
+//   });
+// }
+
 int main(int /* argc */, char** /* argv */) {
   std::function<int(int)> adder = [](int i) { return i + 1; };
   // std::function<int(int)> subtractor = [](int i) { return i - 1; };
