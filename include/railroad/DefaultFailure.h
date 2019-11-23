@@ -12,7 +12,7 @@ namespace railroad {
 
 class DefaultFailure {
  public:
-  DefaultFailure(bool failed = false) : failed_(failed) {}
+  explicit DefaultFailure(bool failed = false) : failed_(failed) {}
   explicit operator bool() const { return failed_; }
 
  private:

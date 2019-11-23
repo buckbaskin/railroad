@@ -12,7 +12,7 @@ namespace railroad {
 
 class DefaultSuccess {
  public:
-  DefaultSuccess(bool passed = false) : passed_(passed) {}
+  explicit DefaultSuccess(bool passed = false) : passed_(passed) {}
   explicit operator bool() const { return passed_; }
 
  private:

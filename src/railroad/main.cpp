@@ -9,132 +9,24 @@
 #include <sstream>
 #include <string>
 
-#include "railroad/DefaultFailure.h"
-#include "railroad/DefaultSuccess.h"
-#include "railroad/Result.h"
+#include "railroad/binds.h"
+#include "railroad/feed.h"
+#include "railroad/style.h"
+#include "railroad/terminate.h"
 
+using ::railroad::binds;
 using ::railroad::Result;
-
-template <typename OutputType, typename InputType,
-          typename OutputFailureType = ::railroad::DefaultFailure,
-          typename InputFailureType = ::railroad::DefaultFailure>
-std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-binds(std::function<OutputType(InputType)> nakedFunc) {
-  return [nakedFunc](Result<InputType, InputFailureType> input) {
-    if (input.hasSuccess()) {
-      return Result<OutputType, OutputFailureType>::Success(
-          nakedFunc(input.getSuccess()), input.getFailurePartial());
-    } else {
-      return Result<OutputType, OutputFailureType>::Failure(
-          input.getFailurePartial());
-    }
-  };
-}
-
-template <typename OutputType, typename InputType,
-          typename OutputFailureType = ::railroad::DefaultFailure,
-          typename InputFailureType = ::railroad::DefaultFailure,
-          typename WrappedFunc>
-std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-binds(WrappedFunc nakedFunc) {
-  return [nakedFunc](Result<InputType, InputFailureType> input) {
-    if (input.hasSuccess()) {
-      return Result<OutputType, OutputFailureType>::Success(
-          nakedFunc(input.getSuccess()), input.getFailurePartial());
-    } else {
-      return Result<OutputType, OutputFailureType>::Failure(
-          input.getFailurePartial());
-    }
-  };
-}
-
-template <typename InputType,
-          typename InputFailureType = ::railroad::DefaultFailure>
-Result<InputType, InputFailureType> feedSuccess(InputType input) {
-  return Result<InputType, InputFailureType>::Success(input);
-}
-
-template <typename InputType = ::railroad::DefaultSuccess,
-          typename InputFailureType>
-Result<InputType, InputFailureType> feedFailure(InputFailureType input) {
-  return Result<InputType, InputFailureType>::Failure(input);
-}
-
-template <typename OutputType,
-          typename OutputFailureType = ::railroad::DefaultFailure>
-OutputType terminateUnsafe(Result<OutputType, OutputFailureType> input) {
-  return input.getSuccess();
-}
-
-template <typename OutputType = ::railroad::DefaultSuccess,
-          typename OutputFailureType>
-OutputFailureType terminateUnsafeFailure(
-    Result<OutputType, OutputFailureType> input) {
-  return input.getFailure();
-}
-
-template <typename OutputType, typename HiddenType, typename InputType>
-std::function<OutputType(InputType)> operator>>(
-    std::function<HiddenType(InputType)> inner,
-    std::function<OutputType(HiddenType)> outer) {
-  return [inner, outer](InputType input) { return outer(inner(input)); };
-}
-
-template <typename OutputType, typename HiddenType, typename InputType,
-          typename OutputFailureType, typename HiddenFailureType,
-          typename InputFailureType>
-std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-operator>>=(std::function<HiddenType(InputType)> inner,
-            std::function<Result<OutputType, OutputFailureType>(
-                Result<HiddenType, HiddenFailureType>)>
-                outer) {
-  auto boundInner = binds(inner);
-  return
-      [boundInner, outer](InputType input) { return outer(boundInner(input)); };
-}
-
-template <typename OutputType, typename HiddenType, typename InputType,
-          typename OutputFailureType = ::railroad::DefaultFailure,
-          typename HiddenFailureType, typename InputFailureType>
-std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-operator>>=(std::function<Result<HiddenType, HiddenFailureType>(
-                Result<InputType, InputFailureType>)>
-                inner,
-            std::function<OutputType(HiddenType)> outer) {
-  auto boundOuter = binds(outer);
-  return [inner, boundOuter](Result<InputType, InputFailureType> input) {
-    return boundOuter(inner(input));
-  };
-}
-
-// template <typename OutputType, typename HiddenType, typename InputType,
-//           typename OutputFailureType = ::railroad::DefaultFailure,
-//           typename InputFailureType = ::railroad::DefaultFailure>
-// std::function<
-//     Result<OutputType, OutputFailureType>(Result<InputType,
-//     InputFailureType>)>
-// operator>>=(std::function<HiddenType(InputType)> inner,
-//             std::function<OutputType(HiddenType)> outer) {
-//   return binds([inner, outer](InputType input) {
-//     return boundOuter(boundInner(input));
-//   });
-// }
 
 int main(int /* argc */, char** /* argv */) {
   std::function<int(int)> adder = [](int i) { return i + 1; };
-  // std::function<int(int)> subtractor = [](int i) { return i - 1; };
   std::function<std::string(int)> stringify = [](int i) {
     std::stringstream buf;
     buf << i << " ;) ";
     return buf.str();
   };
 
-  std::function feed = feedSuccess<int>;
-  std::function terminate = terminateUnsafe<std::string>;
+  std::function feed = ::railroad::helpers::feedSuccess<int>;
+  std::function terminate = ::railroad::unsafe::terminateSuccess<std::string>;
 
   // clang-format off
   std::cout << "Maybe? "
