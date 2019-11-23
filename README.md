@@ -9,6 +9,7 @@ Header-only library for bringing Railway Oriented Programming to C++
   <img alt="Coverity Scan Build Status"
        src="https://scan.coverity.com/projects/19893/badge.svg"/>
 </a>
+[![Coverage Status](https://coveralls.io/repos/github/buckbaskin/railroad/badge.svg?branch=master)](https://coveralls.io/github/buckbaskin/railroad?branch=master)
 
 ## What is it?
 
