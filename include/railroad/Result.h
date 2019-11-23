@@ -25,9 +25,15 @@ class Result {
       : success_(success), failure_(failure) {}
 
   bool hasSuccess() const { return static_cast<bool>(success_); }
-  PartialSuccessResult<SuccessType> getSuccess() const { return success_; }
+  PartialSuccessResult<SuccessType> getSuccessPartial() const {
+    return success_;
+  }
+  SuccessType getSuccess() const { return success_.unpack(); }
   bool hasFailure() const { return static_cast<bool>(failure_); }
-  PartialFailureResult<FailureType> getFailure() const { return failure_; }
+  PartialFailureResult<FailureType> getFailurePartial() const {
+    return failure_;
+  }
+  FailureType getFailure() const { return failure_.unpack(); }
 
   static Result<SuccessType, FailureType> Success(
       const PartialSuccessResult<SuccessType>& happy) {
