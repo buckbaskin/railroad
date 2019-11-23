@@ -13,6 +13,7 @@
 #include "railroad/Result.h"
 
 namespace railroad {
+
 template <typename OutputType, typename InputType,
           typename OutputFailureType = ::railroad::DefaultFailure,
           typename InputFailureType = ::railroad::DefaultFailure>
@@ -47,4 +48,5 @@ binds(WrappedFunc nakedFunc) {
     }
   };
 }
+
 }  // namespace railroad
