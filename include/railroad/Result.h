@@ -6,6 +6,8 @@
 
 #pragma once
 
+#include <iostream>
+
 #include "railroad/PartialFailureResult.h"
 #include "railroad/PartialSuccessResult.h"
 
@@ -71,9 +73,19 @@ class Result {
     return {happy, PartialFailureResult<FailureType>{sad}};
   }
 
+  template <typename S, typename F>
+  friend std::ostream& operator<<(std::ostream& out, const Result<S, F>& r);
+
  private:
   PartialSuccessResult<SuccessType> success_;
   PartialFailureResult<FailureType> failure_;
 };
+
+template <typename SuccessType, typename FailureType>
+std::ostream& operator<<(std::ostream& out,
+                         const Result<SuccessType, FailureType>& r) {
+  out << "Result<>(" << r.success_ << ", " << r.failure_ << ")";
+  return out;
+}
 
 }  // namespace railroad

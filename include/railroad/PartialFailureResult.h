@@ -23,9 +23,26 @@ class PartialFailureResult {
 
   FailureType unpack() const { return *impl_; }
 
+  template <typename F>
+  friend std::ostream& operator<<(std::ostream& out,
+                                  const PartialFailureResult<F>& pfr);
+
  private:
   std::shared_ptr<FailureType> impl_;
 };
+
+template <typename FailureType>
+std::ostream& operator<<(std::ostream& out,
+                         const PartialFailureResult<FailureType>& pfr) {
+  out << "dFailure<>(";
+  if (!static_cast<bool>(pfr.impl_)) {
+    out << "null";
+  } else {
+    out << *(pfr.impl_);
+  }
+  out << ")";
+  return out;
+}
 
 }  // namespace result
 }  // namespace railroad

@@ -23,9 +23,26 @@ class PartialSuccessResult {
 
   SuccessType unpack() const { return *impl_; }
 
+  template <typename S>
+  friend std::ostream& operator<<(std::ostream& out,
+                                  const PartialSuccessResult<S>& psr);
+
  private:
   std::shared_ptr<SuccessType> impl_;
 };
+
+template <typename SuccessType>
+std::ostream& operator<<(std::ostream& out,
+                         const PartialSuccessResult<SuccessType>& psr) {
+  out << "dSuccess<>(";
+  if (!static_cast<bool>(psr.impl_)) {
+    out << "null";
+  } else {
+    out << *(psr.impl_);
+  }
+  out << ")";
+  return out;
+}
 
 }  // namespace result
 }  // namespace railroad

@@ -57,13 +57,18 @@ int main(int /* argc */, char** /* argv */) {
   Stringify intToStr;
   RangeCheck validateAndSplit;
 
-  GenericCompose composed(intInc, intToStr);
-
   // clang-format off
-  std::string fancyComposedResult = composed(rawInput);
+  std::string fancyComposedResult = (
+    intInc
+      >> intInc
+      >> intToStr)(rawInput);
   // clang-format on
   std::cout << "Got result " << fancyComposedResult
             << " via syntax composition." << std::endl;
+
+  ::railroad::Result<int, std::string> r =
+      ::railroad::Result<int, std::string>::Success(1);
+  std::cout << r << std::endl;
 
   return 0;
 }
