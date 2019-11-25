@@ -13,7 +13,9 @@ Header-only library for bringing Railway Oriented Programming to C++
 
 ## What is it?
 
-Nicer looking function composition that makes it easy to explicitly handle errors
+Nicer looking function composition that makes it easy to explicitly handle errors. Every function handles the success case and the error case as part of its function definition or you can use one of the helper functions to automatically implement the other half (e.g. automatically implement success use case while performing logging in the error case).
+
+Specifically handling the error case allows for verifying that the errors that a function can produce are going to be handled at compile time, leading to safer code. On the flip side, providing easy to understand helper functions helps developers add this support with minimal overhead compared to their existing development workflow.
 
 ```C++
 auto result =
