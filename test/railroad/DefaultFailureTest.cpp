@@ -1,5 +1,5 @@
 /*
- * DefaultFailure.cpp
+ * DefaultFailureTest.cpp
  *
  * Copyright 2019 Buck Baskin
  */

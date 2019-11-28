@@ -1,5 +1,5 @@
 /*
- * binds.cpp
+ * bindsTest.cpp
  *
  * Copyright 2019 Buck Baskin
  */
@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include "catch2/catch.hpp"
+#include "rapidcheck.h"
 
 #include "railroad/railroad.h"
 
@@ -23,12 +24,13 @@ TEST_CASE("binds works on pure func", "[binds]") {
   std::function feed = ::railroad::helpers::feedSuccess<int>;
   std::function terminate = ::railroad::helpers::terminateSuccess<int>;
 
-  for (int i = -5; i <= 5; ++i) {
-    int normalResult = adder(i);
-    std::optional<int> bindResult = (feed >> binds(adder) >> terminate)(i);
+  REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
+    int normalResult = adder(checkThis);
+    std::optional<int> bindResult =
+        (feed >> binds(adder) >> terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
-  }
+  }));
 }
 
 TEST_CASE("binds works on partial func", "[binds]") {
@@ -39,12 +41,13 @@ TEST_CASE("binds works on partial func", "[binds]") {
   std::function feed = ::railroad::helpers::feedSuccess<int>;
   std::function terminate = ::railroad::helpers::terminateSuccess<int>;
 
-  for (int i = -5; i <= 5; ++i) {
-    int normalResult = adder(PSRi{i}).unpack();
-    std::optional<int> bindResult = (feed >> binds(adder) >> terminate)(i);
+  REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
+    int normalResult = adder(PSRi{checkThis}).unpack();
+    std::optional<int> bindResult =
+        (feed >> binds(adder) >> terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
-  }
+  }));
 }
 
 }  // namespace
