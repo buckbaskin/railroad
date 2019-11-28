@@ -33,10 +33,6 @@ class PartialFailureResult {
   std::shared_ptr<FailureType> impl_;
 };
 
-template <>
-inline PartialFailureResult<DefaultFailure>::PartialFailureResult()
-    : impl_(new ::railroad::DefaultFailure{}) {}
-
 template <typename FailureType>
 inline std::ostream& operator<<(std::ostream& out,
                                 const PartialFailureResult<FailureType>& pfr) {

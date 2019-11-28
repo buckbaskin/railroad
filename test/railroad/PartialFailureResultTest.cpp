@@ -15,18 +15,23 @@ namespace {
 using ::railroad::DefaultFailure;
 using ::railroad::PartialFailureResult;
 
-TEST_CASE("PartialFailureResult default constructor {}", "[Result]") {
+TEST_CASE("PartialFailureResult default constructor {}",
+          "[PartialFailureResult]") {
   PartialFailureResult<DefaultFailure> presult{};
-
-  std::cout << presult << std::endl;
 
   REQUIRE_FALSE(static_cast<bool>(presult));
 }
 
-TEST_CASE("PartialFailureResult default constructor", "[Result]") {
+TEST_CASE("PartialFailureResult default constructor",
+          "[PartialFailureResult]") {
   PartialFailureResult<DefaultFailure> presult;
 
-  std::cout << presult << std::endl;
+  REQUIRE_FALSE(static_cast<bool>(presult));
+}
+
+TEST_CASE("PartialFailureResult default constructor int",
+          "[PartialFailureResult]") {
+  PartialFailureResult<int> presult;
 
   REQUIRE_FALSE(static_cast<bool>(presult));
 }
