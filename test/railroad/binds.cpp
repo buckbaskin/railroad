@@ -14,7 +14,7 @@
 #include "railroad/railroad.h"
 
 namespace {
-    
+
 using ::railroad::binds;  // aka bindSuccess
 
 TEST_CASE("binds works as expected", "[binds]") {
@@ -31,4 +31,4 @@ TEST_CASE("binds works as expected", "[binds]") {
   }
 }
 
-}
+}  // namespace

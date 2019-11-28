@@ -83,7 +83,7 @@ class Result {
 
 template <typename SuccessType, typename FailureType>
 inline std::ostream& operator<<(std::ostream& out,
-                         const Result<SuccessType, FailureType>& r) {
+                                const Result<SuccessType, FailureType>& r) {
   out << "Result<>(" << r.success_ << ", " << r.failure_ << ")";
   return out;
 }

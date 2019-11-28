@@ -33,7 +33,7 @@ class PartialSuccessResult {
 
 template <typename SuccessType>
 inline std::ostream& operator<<(std::ostream& out,
-                         const PartialSuccessResult<SuccessType>& psr) {
+                                const PartialSuccessResult<SuccessType>& psr) {
   out << "Success?<>(";
   if (!static_cast<bool>(psr.impl_)) {
     out << "null";

@@ -16,17 +16,17 @@
 namespace {
 
 using railroad::DefaultSuccess;
-    
+
 TEST_CASE("Construct Success(true)", "[DefaultSuccess]") {
-    DefaultSuccess df(true);
-    std::cout << df << std::endl;
-    REQUIRE(static_cast<bool>(df));
+  DefaultSuccess df(true);
+  std::cout << df << std::endl;
+  REQUIRE(static_cast<bool>(df));
 }
 
 TEST_CASE("Construct Success(false)", "[DefaultSuccess]") {
-    DefaultSuccess df(false);
-    std::cout << df << std::endl;
-    REQUIRE_FALSE(static_cast<bool>(df));
+  DefaultSuccess df(false);
+  std::cout << df << std::endl;
+  REQUIRE_FALSE(static_cast<bool>(df));
 }
 
-}
+}  // namespace

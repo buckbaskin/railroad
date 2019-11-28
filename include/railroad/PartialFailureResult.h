@@ -39,7 +39,7 @@ inline PartialFailureResult<DefaultFailure>::PartialFailureResult()
 
 template <typename FailureType>
 inline std::ostream& operator<<(std::ostream& out,
-                         const PartialFailureResult<FailureType>& pfr) {
+                                const PartialFailureResult<FailureType>& pfr) {
   out << "Failure?<>(";
   if (!static_cast<bool>(pfr.impl_)) {
     out << "null";

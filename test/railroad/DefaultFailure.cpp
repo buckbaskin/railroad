@@ -16,17 +16,17 @@
 namespace {
 
 using railroad::DefaultFailure;
-    
+
 TEST_CASE("Construct Failure(true)", "[DefaultFailure]") {
-    DefaultFailure df(true);
-    std::cout << df << std::endl; 
-    REQUIRE(static_cast<bool>(df));
+  DefaultFailure df(true);
+  std::cout << df << std::endl;
+  REQUIRE(static_cast<bool>(df));
 }
 
 TEST_CASE("Construct Failure(false)", "[DefaultFailure]") {
-    DefaultFailure df(false);
-    std::cout << df << std::endl;
-    REQUIRE_FALSE(static_cast<bool>(df));
+  DefaultFailure df(false);
+  std::cout << df << std::endl;
+  REQUIRE_FALSE(static_cast<bool>(df));
 }
 
-}
+}  // namespace
