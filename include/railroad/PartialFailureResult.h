@@ -38,7 +38,7 @@ inline PartialFailureResult<DefaultFailure>::PartialFailureResult()
     : impl_(new ::railroad::DefaultFailure{}) {}
 
 template <typename FailureType>
-std::ostream& operator<<(std::ostream& out,
+inline std::ostream& operator<<(std::ostream& out,
                          const PartialFailureResult<FailureType>& pfr) {
   out << "Failure?<>(";
   if (!static_cast<bool>(pfr.impl_)) {

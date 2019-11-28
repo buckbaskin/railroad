@@ -1,5 +1,5 @@
 /*
- * basic.cpp
+ * binds.cpp
  *
  * Copyright 2019 Buck Baskin
  */
@@ -13,6 +13,8 @@
 
 #include "railroad/railroad.h"
 
+namespace {
+    
 using ::railroad::binds;  // aka bindSuccess
 
 TEST_CASE("binds works as expected", "[binds]") {
@@ -27,4 +29,6 @@ TEST_CASE("binds works as expected", "[binds]") {
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }
+}
+
 }

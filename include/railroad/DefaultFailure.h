@@ -19,7 +19,7 @@ class DefaultFailure {
   bool failed_ = false;
 };
 
-std::ostream& operator<<(std::ostream& out, const DefaultFailure& df) {
+inline std::ostream& operator<<(std::ostream& out, const DefaultFailure& df) {
   out << "DefaultFailure(";
   if (static_cast<bool>(df)) {
     out << "failing";

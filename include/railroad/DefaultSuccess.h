@@ -19,7 +19,7 @@ class DefaultSuccess {
   bool passed_ = false;
 };
 
-std::ostream& operator<<(std::ostream& out, const DefaultSuccess& df) {
+inline std::ostream& operator<<(std::ostream& out, const DefaultSuccess& df) {
   out << "DefaultSuccess(";
   if (static_cast<bool>(df)) {
     out << "passing";
