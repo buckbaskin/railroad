@@ -24,35 +24,37 @@ using ::railroad::helpers::feedSuccess;
 TEST_CASE("feedSuccess<int> works as expected", "[feed]") {
   std::function feed = feedSuccess<int>;
 
-  REQUIRE(rc::check("pass through equivalent", [feed](int checkThis) {
+  REQUIRE(rc::check([feed](int checkThis) {
     Result<int, DefaultFailure> result = feed(checkThis);
-    RC_ASSERT(result.hasSuccess());
-    RC_ASSERT(!result.hasFailure());
+    REQUIRE(result.hasSuccess());
+    REQUIRE_FALSE(result.hasFailure());
 
-    RC_ASSERT(result.getSuccess() == checkThis);
+    REQUIRE(result.getSuccess() == checkThis);
   }));
 }
 
 TEST_CASE("feedSuccess<int, string> works as expected", "[feed]") {
   std::function feed = feedSuccess<int, std::string>;
 
-  Result<int, std::string> result = feed(5);
+  REQUIRE(rc::check([feed](int checkThis) {
+    Result<int, std::string> result = feed(checkThis);
+    REQUIRE(result.hasSuccess());
+    REQUIRE_FALSE(result.hasFailure());
 
-  REQUIRE(result.hasSuccess());
-  REQUIRE_FALSE(result.hasFailure());
-
-  CHECK(result.getSuccess() == 5);
+    REQUIRE(result.getSuccess() == checkThis);
+  }));
 }
 
 TEST_CASE("feedFailure<int, std::string> works as expected", "[feed]") {
   std::function feed = feedFailure<int, std::string>;
 
-  Result<int, std::string> result = feed("Hello");
+  REQUIRE(rc::check([feed](const std::string& checkThis) {
+    Result<int, std::string> result = feed(checkThis);
+    REQUIRE(result.hasFailure());
+    REQUIRE_FALSE(result.hasSuccess());
 
-  REQUIRE(result.hasFailure());
-  REQUIRE_FALSE(result.hasSuccess());
-
-  CHECK(result.getFailure() == "Hello");
+    REQUIRE(result.getFailure() == checkThis);
+  }));
 }
 
 }  // namespace
