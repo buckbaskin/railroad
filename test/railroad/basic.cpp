@@ -1,9 +1,8 @@
 /*
- * BasicTest.cpp
+ * basic.cpp
  *
  * Copyright 2019 Buck Baskin
  */
-#define CATCH_CONFIG_MAIN
 
 #include <functional>
 #include <iostream>
@@ -29,3 +28,4 @@ TEST_CASE("binds works as expected", "[binds]") {
     REQUIRE(normalResult == *(bindResult));
   }
 }
+
