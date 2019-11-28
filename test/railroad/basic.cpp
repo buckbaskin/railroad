@@ -3,19 +3,20 @@
  *
  * Copyright 2019 Buck Baskin
  */
+#define CATCH_CONFIG_MAIN
 
 #include <functional>
 #include <iostream>
 #include <sstream>
 #include <string>
 
+#include "catch2/catch.hpp"
+
 #include "railroad/railroad.h"
 
 using ::railroad::binds;  // aka bindSuccess
 
-int main(int /* argc */, char** /* argv */) {
-  std::cout << "Start Testing" << std::endl;
-
+TEST_CASE("binds works as expected", "[binds]") {
   std::function<int(int)> adder = [](int i) { return i + 1; };
 
   std::function feed = ::railroad::helpers::feedSuccess<int>;
@@ -24,14 +25,7 @@ int main(int /* argc */, char** /* argv */) {
   for (int i = -5; i <= 5; ++i) {
     int normalResult = adder(i);
     std::optional<int> bindResult = (feed >> binds(adder) >> terminate)(i);
-    if (!bindResult) {
-      return 1;
-    }
-    if (normalResult != *(bindResult)) {
-      return 2;
-    }
+    REQUIRE(static_cast<bool>(bindResult));
+    REQUIRE(normalResult == *(bindResult));
   }
-
-  std::cout << "Success" << std::endl;
-  return 0;
 }
