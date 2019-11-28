@@ -28,4 +28,3 @@ TEST_CASE("binds works as expected", "[binds]") {
     REQUIRE(normalResult == *(bindResult));
   }
 }
-
