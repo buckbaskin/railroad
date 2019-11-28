@@ -37,42 +37,6 @@ class Result {
   }
   FailureType getFailure() const { return failure_.unpack(); }
 
-  static Result<SuccessType, FailureType> Success(
-      const PartialSuccessResult<SuccessType>& happy) {
-    return {happy, PartialFailureResult<FailureType>{}};
-  }
-  static Result<SuccessType, FailureType> Success(
-      const PartialSuccessResult<SuccessType>& happy,
-      const PartialFailureResult<FailureType>& sad) {
-    return {happy, sad};
-  }
-  static Result<SuccessType, FailureType> Success(const SuccessType& happy) {
-    return Success(PartialSuccessResult<SuccessType>{happy},
-                   PartialFailureResult<FailureType>{});
-  }
-  static Result<SuccessType, FailureType> Success(
-      const SuccessType& happy, const PartialFailureResult<FailureType>& sad) {
-    return {PartialSuccessResult<SuccessType>{happy}, sad};
-  }
-
-  static Result<SuccessType, FailureType> Failure(
-      const PartialFailureResult<FailureType>& sad) {
-    return {PartialSuccessResult<SuccessType>{}, sad};
-  }
-  static Result<SuccessType, FailureType> Failure(
-      const PartialSuccessResult<SuccessType>& happy,
-      const PartialFailureResult<FailureType>& sad) {
-    return {happy, sad};
-  }
-  static Result<SuccessType, FailureType> Failure(const FailureType& sad) {
-    return Failure(PartialSuccessResult<SuccessType>{},
-                   PartialFailureResult<FailureType>{sad});
-  }
-  static Result<SuccessType, FailureType> Failure(
-      const PartialSuccessResult<SuccessType>& happy, const FailureType& sad) {
-    return {happy, PartialFailureResult<FailureType>{sad}};
-  }
-
   template <typename S, typename F>
   friend std::ostream& operator<<(std::ostream& out, const Result<S, F>& r);
 
@@ -86,6 +50,50 @@ inline std::ostream& operator<<(std::ostream& out,
                                 const Result<SuccessType, FailureType>& r) {
   out << "Result<>(" << r.success_ << ", " << r.failure_ << ")";
   return out;
+}
+
+template <typename SuccessType, typename FailureType = DefaultFailure>
+static Result<SuccessType, FailureType> Success(
+    const PartialSuccessResult<SuccessType>& happy) {
+  return {happy, PartialFailureResult<FailureType>{}};
+}
+template <typename SuccessType, typename FailureType = DefaultFailure>
+static Result<SuccessType, FailureType> Success(
+    const PartialSuccessResult<SuccessType>& happy,
+    const PartialFailureResult<FailureType>& sad) {
+  return {happy, sad};
+}
+template <typename SuccessType, typename FailureType = DefaultFailure>
+static Result<SuccessType, FailureType> Success(const SuccessType& happy) {
+  return Success(PartialSuccessResult<SuccessType>{happy},
+                 PartialFailureResult<FailureType>{});
+}
+template <typename SuccessType, typename FailureType = DefaultFailure>
+static Result<SuccessType, FailureType> Success(
+    const SuccessType& happy, const PartialFailureResult<FailureType>& sad) {
+  return {PartialSuccessResult<SuccessType>{happy}, sad};
+}
+
+template <typename SuccessType, typename FailureType>
+static Result<SuccessType, FailureType> Failure(
+    const PartialFailureResult<FailureType>& sad) {
+  return {PartialSuccessResult<SuccessType>{}, sad};
+}
+template <typename SuccessType, typename FailureType>
+static Result<SuccessType, FailureType> Failure(
+    const PartialSuccessResult<SuccessType>& happy,
+    const PartialFailureResult<FailureType>& sad) {
+  return {happy, sad};
+}
+template <typename SuccessType, typename FailureType>
+static Result<SuccessType, FailureType> Failure(const FailureType& sad) {
+  return Failure(PartialSuccessResult<SuccessType>{},
+                 PartialFailureResult<FailureType>{sad});
+}
+template <typename SuccessType, typename FailureType>
+static Result<SuccessType, FailureType> Failure(
+    const PartialSuccessResult<SuccessType>& happy, const FailureType& sad) {
+  return {happy, PartialFailureResult<FailureType>{sad}};
 }
 
 }  // namespace railroad

@@ -18,13 +18,13 @@ namespace helpers {
 template <typename InputType,
           typename InputFailureType = ::railroad::DefaultFailure>
 Result<InputType, InputFailureType> feedSuccess(InputType input) {
-  return Result<InputType, InputFailureType>::Success(input);
+  return Success<InputType, InputFailureType>(input);
 }
 
 template <typename InputType = ::railroad::DefaultSuccess,
           typename InputFailureType>
 Result<InputType, InputFailureType> feedFailure(InputFailureType input) {
-  return Result<InputType, InputFailureType>::Failure(input);
+  return Failure<InputType, InputFailureType>(input);
 }
 
 }  // namespace helpers

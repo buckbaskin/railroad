@@ -22,11 +22,10 @@ std::function<
 binds(std::function<OutputType(InputType)> nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasSuccess()) {
-      return Result<OutputType, OutputFailureType>::Success(
+      return Success<OutputType, OutputFailureType>(
           nakedFunc(input.getSuccess()), input.getFailurePartial());
     } else {
-      return Result<OutputType, OutputFailureType>::Failure(
-          input.getFailurePartial());
+      return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
     }
   };
 }
@@ -40,11 +39,10 @@ std::function<
 binds(WrappedFunc nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasSuccess()) {
-      return Result<OutputType, OutputFailureType>::Success(
+      return Success<OutputType, OutputFailureType>(
           nakedFunc(input.getSuccess()), input.getFailurePartial());
     } else {
-      return Result<OutputType, OutputFailureType>::Failure(
-          input.getFailurePartial());
+      return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
     }
   };
 }
