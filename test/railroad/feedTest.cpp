@@ -7,7 +7,6 @@
 #include <functional>
 #include <iostream>
 #include <string>
-
 #include "catch2/catch.hpp"
 #include "rapidcheck.h"
 

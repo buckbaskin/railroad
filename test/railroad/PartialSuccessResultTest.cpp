@@ -4,9 +4,8 @@
  * Copyright 2019 Buck Baskin
  */
 
-#include "catch2/catch.hpp"
-
 #include <iostream>
+#include "catch2/catch.hpp"
 
 #include "railroad/railroad.h"
 
