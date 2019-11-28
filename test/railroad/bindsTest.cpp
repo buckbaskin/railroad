@@ -16,6 +16,8 @@
 namespace {
 
 using ::railroad::binds;  // aka bindSuccess
+using ::railroad::DefaultFailure;
+using ::railroad::Failure;
 using PSRi = ::railroad::PartialSuccessResult<int>;
 
 TEST_CASE("binds works on pure func", "[binds]") {
@@ -30,6 +32,12 @@ TEST_CASE("binds works on pure func", "[binds]") {
         (feed >> binds(adder) >> terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
+  }));
+
+  REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
+    std::optional<int> bindResult = (binds(adder) >> terminate)(
+        Failure<int, DefaultFailure>(DefaultFailure{checkThis}));
+    REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));
 }
 
@@ -47,6 +55,12 @@ TEST_CASE("binds works on partial func", "[binds]") {
         (feed >> binds(adder) >> terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
+  }));
+
+  REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
+    std::optional<int> bindResult = (binds(adder) >> terminate)(
+        Failure<int, DefaultFailure>(DefaultFailure{checkThis}));
+    REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));
 }
 
