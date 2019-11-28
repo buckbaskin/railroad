@@ -5,7 +5,7 @@ cat runtest.bash
 
 cd build/ &&\
 make all-tests &&\
-ctest -V
+RC_PARAMS="seed=12776003016957408636" ctest -V
 CTEST_STATUS=$?
 cd -
 

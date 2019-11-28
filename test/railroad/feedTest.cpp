@@ -9,6 +9,7 @@
 #include <string>
 
 #include "catch2/catch.hpp"
+#include "rapidcheck.h"
 
 #include "railroad/railroad.h"
 
@@ -23,12 +24,13 @@ using ::railroad::helpers::feedSuccess;
 TEST_CASE("feedSuccess<int> works as expected", "[feed]") {
   std::function feed = feedSuccess<int>;
 
-  Result<int, DefaultFailure> result = feed(5);
+  REQUIRE(rc::check("pass through equivalent", [feed](int checkThis) {
+    Result<int, DefaultFailure> result = feed(checkThis);
+    RC_ASSERT(result.hasSuccess());
+    RC_ASSERT(!result.hasFailure());
 
-  REQUIRE(result.hasSuccess());
-  REQUIRE_FALSE(result.hasFailure());
-
-  CHECK(result.getSuccess() == 5);
+    RC_ASSERT(result.getSuccess() == checkThis);
+  }));
 }
 
 TEST_CASE("feedSuccess<int, string> works as expected", "[feed]") {

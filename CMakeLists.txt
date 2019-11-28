@@ -27,13 +27,15 @@ if(BUILD_TESTING)
     include(third_party/Catch2/contrib/Catch.cmake)
     include(third_party/Catch2/contrib/ParseAndAddCatchTests.cmake)
 
+    add_subdirectory(third_party/rapidcheck)
+
     file(GLOB TEST_FILES "${CMAKE_CURRENT_SOURCE_DIR}/test/railroad/*.cpp")
 
     add_custom_target(all-tests)
 
     # ... Make Tests ...
     add_executable(UnitTests ${TEST_FILES})
-    target_link_libraries(UnitTests Catch2::Catch2)
+    target_link_libraries(UnitTests Catch2::Catch2 rapidcheck)
     # catch_discover_tests(UnitTests)
     add_dependencies(all-tests UnitTests)
     add_test(NAME UnitTests COMMAND UnitTests)
