@@ -8,6 +8,8 @@
 
 #include <memory>
 
+#include "railroad/DefaultSuccess.h"
+
 namespace railroad {
 namespace result {
 
