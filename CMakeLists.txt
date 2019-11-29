@@ -6,9 +6,15 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-add_compile_options(-O0 -g)
+add_compile_options(-Og -g)
 add_compile_options(-Wall -Wextra -Wreturn-type)
 add_compile_options(-Werror)
+
+set(CHECK_OPTIMIZATIONS FALSE)
+
+if (CHECK_OPTIMIZATIONS)
+add_compile_options(-fopt-info-all-optall=all_opt.txt)
+endif()
 
 include_directories(include/)
 
@@ -18,7 +24,7 @@ install(TARGETS demonstrator DESTINATION bin)
 
 include(CTest)
 
-if(BUILD_TESTING)
+if(BUILD_TESTING AND (NOT CHECK_OPTIMIZATIONS))
     # find_package(Catch2 REQUIRED)
     # include(Catch)
 
