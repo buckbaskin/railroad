@@ -64,4 +64,25 @@ TEST_CASE("binds works on partial func", "[binds]") {
   }));
 }
 
+TEST_CASE("binds works on lambda", "[binds]") {
+  auto adder = [](int i) -> int { return i + 1; };
+
+  std::function feed = ::railroad::helpers::feedSuccess<int>;
+  std::function terminate = ::railroad::helpers::terminateSuccess<int>;
+
+  REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
+    int normalResult = adder(checkThis);
+    std::optional<int> bindResult =
+        (feed >> binds<int, int>(adder) >> terminate)(checkThis);
+    REQUIRE(static_cast<bool>(bindResult));
+    REQUIRE(normalResult == *(bindResult));
+  }));
+
+  REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
+    std::optional<int> bindResult = (binds<int, int>(adder) >> terminate)(
+        Failure<int, DefaultFailure>(DefaultFailure{checkThis}));
+    REQUIRE_FALSE(static_cast<bool>(bindResult));
+  }));
+}
+
 }  // namespace
