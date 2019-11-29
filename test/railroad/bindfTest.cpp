@@ -15,8 +15,9 @@
 
 namespace {
 
-using ::railroad::Bindfc;  // aka bindFailure
+using ::railroad::bindf;  // aka bindFailure
 using ::railroad::DefaultSuccess;
+using ::railroad::Success;
 using PFRi = ::railroad::PartialFailureResult<int>;
 
 TEST_CASE("bindf works on pure func", "[bindf]") {
@@ -27,33 +28,71 @@ TEST_CASE("bindf works on pure func", "[bindf]") {
       ::railroad::helpers::terminateFailure<DefaultSuccess, int>;
 
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
-    Bindfc bindfc;
     int normalResult = adder(checkThis);
     std::optional<int> bindResult =
-        (feed >> bindfc(adder) >> terminate)(checkThis);
+        (feed >> bindf<DefaultSuccess, DefaultSuccess>(adder) >>
+         terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
+
+  REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
+    std::optional<int> bindResult =
+        (bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+         terminate)(Success<DefaultSuccess, int>(DefaultSuccess{checkThis}));
+    REQUIRE_FALSE(static_cast<bool>(bindResult));
+  }));
 }
 
-/*
 TEST_CASE("bindf works on partial func", "[bindf]") {
   std::function<PFRi(PFRi)> adder = [](PFRi val) {
     return PFRi{val.unpack() + 1};
   };
 
-  std::function feed = ::railroad::helpers::feedFailure<std::string, int>;
+  std::function feed = ::railroad::helpers::feedFailure<DefaultSuccess, int>;
   std::function terminate =
-      ::railroad::helpers::terminateFailure<std::string, int>;
+      ::railroad::helpers::terminateFailure<DefaultSuccess, int>;
 
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
     int normalResult = adder(PFRi{checkThis}).unpack();
     std::optional<int> bindResult =
-        (feed >> bindf(adder) >> terminate)(checkThis);
+        (feed >> bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+         terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
+
+  REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
+    std::optional<int> bindResult =
+        (bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+         terminate)(Success<DefaultSuccess, int>(DefaultSuccess{checkThis}));
+    REQUIRE_FALSE(static_cast<bool>(bindResult));
+  }));
 }
-*/
+
+TEST_CASE("bindf works on lambda", "[bindf]") {
+  auto adder = [](int incThis) -> int { return incThis + 1; };
+
+  std::function feed = ::railroad::helpers::feedFailure<DefaultSuccess, int>;
+  std::function terminate =
+      ::railroad::helpers::terminateFailure<DefaultSuccess, int>;
+
+  REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
+    int normalResult = adder(checkThis);
+    std::optional<int> bindResult =
+        (feed >> bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+         terminate)(checkThis);
+
+    REQUIRE(static_cast<bool>(bindResult));
+    REQUIRE(normalResult == *(bindResult));
+  }));
+
+  REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
+    std::optional<int> bindResult =
+        (bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+         terminate)(Success<DefaultSuccess, int>(DefaultSuccess{checkThis}));
+    REQUIRE_FALSE(static_cast<bool>(bindResult));
+  }));
+}
 
 }  // namespace
