@@ -158,4 +158,35 @@ TEST_CASE("bind works on partialSF func", "[bind]") {
   }));
 }
 
+TEST_CASE("bind works on partialFS func", "[bind]") {
+  std::function<PartialSuccessResult<string>(PartialFailureResult<int>)> half =
+      [](PartialFailureResult<int> pfr) -> PartialSuccessResult<string> {
+    std::stringstream buf;
+    buf << "Success: " << pfr.unpack();
+    return PartialSuccessResult<string>(buf.str());
+  };
+
+  std::function feedS = ::railroad::helpers::feedSuccess<string, int>;
+  std::function feedF = ::railroad::helpers::feedFailure<string, int>;
+  std::function terminateS = ::railroad::helpers::terminateSuccess<string, int>;
+
+  REQUIRE(rc::check([feedF, half, terminateS](int checkThis) {
+    string normalResult = half(PartialFailureResult(checkThis)).unpack();
+    std::optional<string> bindResult =
+        (feedF >> bindr<string, string, int, int>(half) >>
+         terminateS)(checkThis);
+    REQUIRE(static_cast<bool>(bindResult));
+    REQUIRE(normalResult == *(bindResult));
+  }));
+
+  REQUIRE(rc::check([feedS, half, terminateS](string checkThis) {
+    string normalResult = checkThis;
+    std::optional<string> bindResult =
+        (feedS >> bindr<string, string, int, int>(half) >>
+         terminateS)(checkThis);
+    REQUIRE(static_cast<bool>(bindResult));
+    REQUIRE(normalResult == *(bindResult));
+  }));
+}
+
 }  // namespace

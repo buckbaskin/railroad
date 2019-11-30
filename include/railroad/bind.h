@@ -54,7 +54,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 bindr(std::function<
-      PartialSuccessResult<OutputType>(PartialFailureResult<InputType>)>
+      PartialSuccessResult<OutputType>(PartialFailureResult<InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
