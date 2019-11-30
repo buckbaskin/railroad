@@ -21,6 +21,9 @@ template <typename OutputType, typename InputType,
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 binds(std::function<OutputType(InputType)> nakedFunc) {
+  // TODO: Remove this via changing template
+  static_assert(std::is_same<OutputFailureType, InputFailureType>::value,
+                "binds won't convert output types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
@@ -39,6 +42,8 @@ std::function<
 binds(std::function<
       PartialSuccessResult<OutputType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
+  static_assert(std::is_same<OutputFailureType, InputFailureType>::value,
+                "binds won't convert output types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
@@ -56,6 +61,8 @@ template <typename OutputType, typename InputType,
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 binds(WrappedFunc nakedFunc) {
+  static_assert(std::is_same<OutputFailureType, InputFailureType>::value,
+                "binds won't convert output types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
