@@ -266,6 +266,68 @@ TEST_CASE("bind works on partialFR func", "[bind]") {
 }  // namespace OneTwo
 
 // 2:1
-namespace TwoOne {}
+namespace TwoOne {
+TEST_CASE("bind works on partialRS func", "[bind]") {
+  std::function<PartialSuccessResult<string>(Result<int, int>)> half =
+      [](Result<int, int> input) {
+        if (input.hasFailure()) {
+          return PartialSuccessResult<string>{string{"Failure :("}};
+        }
+        std::stringstream buf;
+        buf << "Success: " << input.getSuccess();
+        return PartialSuccessResult<string>{buf.str()};
+      };
+
+  std::function feedS = ::railroad::helpers::feedSuccess<int, int>;
+  std::function feedF = ::railroad::helpers::feedFailure<int, int>;
+  std::function terminateS =
+      ::railroad::unsafe::terminateSuccess<string, string>;
+
+  REQUIRE(rc::check([feedS, half, terminateS](int checkThis) {
+    string normalResult = half(Success<int, int>(checkThis)).unpack();
+    string bindResult = (feedS >> bindr<string, int, string, int>(half) >>
+                         terminateS)(checkThis);
+    REQUIRE(normalResult == bindResult);
+  }));
+
+  REQUIRE(rc::check([feedF, half, terminateS](int checkThis) {
+    string normalResult = half(Failure<int, int>(checkThis)).unpack();
+    string bindResult = (feedF >> bindr<string, int, string, int>(half) >>
+                         terminateS)(checkThis);
+    REQUIRE(normalResult == bindResult);
+  }));
+}
+
+TEST_CASE("bind works on partialRF func", "[bind]") {
+  std::function<PartialFailureResult<string>(Result<int, int>)> half =
+      [](Result<int, int> input) {
+        if (input.hasFailure()) {
+          return PartialFailureResult<string>{string{"Failure :("}};
+        }
+        std::stringstream buf;
+        buf << "Success: " << input.getSuccess();
+        return PartialFailureResult<string>{buf.str()};
+      };
+
+  std::function feedS = ::railroad::helpers::feedSuccess<int, int>;
+  std::function feedF = ::railroad::helpers::feedFailure<int, int>;
+  std::function terminateF =
+      ::railroad::unsafe::terminateFailure<string, string>;
+
+  REQUIRE(rc::check([feedS, half, terminateF](int checkThis) {
+    string normalResult = half(Success<int, int>(checkThis)).unpack();
+    string bindResult = (feedS >> bindr<string, int, string, int>(half) >>
+                         terminateF)(checkThis);
+    REQUIRE(normalResult == bindResult);
+  }));
+
+  REQUIRE(rc::check([feedF, half, terminateF](int checkThis) {
+    string normalResult = half(Failure<int, int>(checkThis)).unpack();
+    string bindResult = (feedF >> bindr<string, int, string, int>(half) >>
+                         terminateF)(checkThis);
+    REQUIRE(normalResult == bindResult);
+  }));
+}
+}  // namespace TwoOne
 
 }  // namespace

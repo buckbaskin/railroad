@@ -123,4 +123,30 @@ bindr(std::function<Result<OutputType, OutputFailureType>(
   };
 }
 
+// 2:1
+
+template <typename OutputType, typename InputType, typename OutputFailureType,
+          typename InputFailureType>
+std::function<
+    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+bindr(std::function<
+      PartialSuccessResult<OutputType>(Result<InputType, InputFailureType>)>
+          nakedFunc) {
+  return [nakedFunc](Result<InputType, InputFailureType> input) {
+    return Success<OutputType, OutputFailureType>(nakedFunc(input));
+  };
+}
+
+template <typename OutputType, typename InputType, typename OutputFailureType,
+          typename InputFailureType>
+std::function<
+    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+bindr(std::function<PartialFailureResult<OutputFailureType>(
+          Result<InputType, InputFailureType>)>
+          nakedFunc) {
+  return [nakedFunc](Result<InputType, InputFailureType> input) {
+    return Failure<OutputType, OutputFailureType>(nakedFunc(input));
+  };
+}
+
 }  // namespace railroad
