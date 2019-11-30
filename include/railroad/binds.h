@@ -22,11 +22,11 @@ std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 binds(std::function<OutputType(InputType)> nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
-    if (input.hasSuccess()) {
-      return Success<OutputType, OutputFailureType>(
-          nakedFunc(input.getSuccess()), input.getFailurePartial());
-    } else {
+    if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
+    } else {
+      return Success<OutputType, OutputFailureType>(
+          nakedFunc(input.getSuccess()));
     }
   };
 }
@@ -40,11 +40,11 @@ binds(std::function<
       PartialSuccessResult<OutputType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
-    if (input.hasSuccess()) {
-      return Success<OutputType, OutputFailureType>(
-          nakedFunc(input.getSuccessPartial()), input.getFailurePartial());
-    } else {
+    if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
+    } else {
+      return Success<OutputType, OutputFailureType>(
+          nakedFunc(input.getSuccessPartial()));
     }
   };
 }
@@ -57,11 +57,11 @@ std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 binds(WrappedFunc nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
-    if (input.hasSuccess()) {
-      return Success<OutputType, OutputFailureType>(
-          nakedFunc(input.getSuccess()), input.getFailurePartial());
-    } else {
+    if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
+    } else {
+      return Success<OutputType, OutputFailureType>(
+          nakedFunc(input.getSuccess()));
     }
   };
 }
