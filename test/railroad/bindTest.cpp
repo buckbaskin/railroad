@@ -16,8 +16,8 @@
 namespace {
 
 using ::railroad::binds;  // aka bindSuccess
-using ::railroad::Result;
 using ::railroad::Failure;
+using ::railroad::Result;
 using ::railroad::Success;
 using ::railroad::result::PartialFailureResult;
 using ::railroad::result::PartialSuccessResult;
@@ -26,16 +26,16 @@ using ::std::string;
 TEST_CASE("binds works on complete func", "[binds]") {
   std::function<Result<string, string>(Result<int, int>)> full =
       [](Result<int, int> r) -> Result<string, string> {
-        if (r.hasFailure()) {
-          std::stringstream buf;
-          buf << "Failure: " << r.getFailure();
-          return Failure<string, string>(buf.str());
-        } else {
-          std::stringstream buf;
-          buf << "Success: " << r.getSuccess();
-          return Success<string, string>(buf.str());
-        }
-      };
+    if (r.hasFailure()) {
+      std::stringstream buf;
+      buf << "Failure: " << r.getFailure();
+      return Failure<string, string>(buf.str());
+    } else {
+      std::stringstream buf;
+      buf << "Success: " << r.getSuccess();
+      return Success<string, string>(buf.str());
+    }
+  };
 
   std::function feedS = ::railroad::helpers::feedSuccess<int, int>;
   std::function feedF = ::railroad::helpers::feedFailure<int, int>;
@@ -44,22 +44,23 @@ TEST_CASE("binds works on complete func", "[binds]") {
   std::function terminateF =
       ::railroad::helpers::terminateFailure<string, string>;
 
-  REQUIRE(rc::check([feedS, feedF, full, terminateS,
-                     terminateF](int checkThis) {
-    string normalResult = full(Success<int, int>(checkThis)).getSuccess();
-    std::optional<string> bindResult =
-        (feedS >> bind(full) >> terminateS)(checkThis);
-    REQUIRE(static_cast<bool>(bindResult));
-    REQUIRE(normalResult == *(bindResult));
-  }));
+  REQUIRE(
+      rc::check([feedS, feedF, full, terminateS, terminateF](int checkThis) {
+        string normalResult = full(Success<int, int>(checkThis)).getSuccess();
+        std::optional<string> bindResult =
+            (feedS >> bind(full) >> terminateS)(checkThis);
+        REQUIRE(static_cast<bool>(bindResult));
+        REQUIRE(normalResult == *(bindResult));
+      }));
 
-  /*
-    REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
-      std::optional<int> bindResult = (binds(adder) >> terminate)(
-          Failure<int, DefaultFailure>(DefaultFailure{checkThis}));
-      REQUIRE_FALSE(static_cast<bool>(bindResult));
-    }));
-    */
+  REQUIRE(
+      rc::check([feedS, feedF, full, terminateS, terminateF](int checkThis) {
+        string normalResult = full(Failure<int, int>(checkThis)).getFailure();
+        std::optional<string> bindResult =
+            (feedF >> bind(full) >> terminateF)(checkThis);
+        REQUIRE(static_cast<bool>(bindResult));
+        REQUIRE(normalResult == *(bindResult));
+      }));
 }
 
 }  // namespace
