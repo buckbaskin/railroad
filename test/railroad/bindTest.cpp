@@ -23,6 +23,9 @@ using ::railroad::result::PartialFailureResult;
 using ::railroad::result::PartialSuccessResult;
 using ::std::string;
 
+// 2:2
+namespace TwoTwo {
+
 TEST_CASE("bind works on complete func", "[bind]") {
   std::function<Result<string, string>(Result<int, int>)> full =
       [](Result<int, int> r) -> Result<string, string> {
@@ -62,6 +65,10 @@ TEST_CASE("bind works on complete func", "[bind]") {
         REQUIRE(normalResult == *(bindResult));
       }));
 }
+}  // namespace TwoTwo
+
+// 1:1
+namespace OneOne {
 
 TEST_CASE("bind works on partialSS func", "[bind]") {
   std::function<PartialSuccessResult<string>(PartialSuccessResult<int>)> half =
@@ -188,5 +195,77 @@ TEST_CASE("bind works on partialFS func", "[bind]") {
     REQUIRE(normalResult == *(bindResult));
   }));
 }
+}  // namespace OneOne
+
+// 1:2
+namespace OneTwo {
+TEST_CASE("bind works on partialSR func", "[bind]") {
+  std::function<Result<string, string>(PartialSuccessResult<int>)> half =
+      [](PartialSuccessResult<int> psr) {
+        std::stringstream buff;
+        buff << "Failure: " << psr.unpack();
+
+        std::stringstream bufs;
+        bufs << "Success: " << psr.unpack();
+
+        return Result<string, string>(bufs.str(), buff.str());
+      };
+
+  std::function feedS = ::railroad::helpers::feedSuccess<int, string>;
+  std::function feedF = ::railroad::helpers::feedFailure<int, string>;
+
+  REQUIRE(rc::check([feedS, half](int checkThis) {
+    Result<string, string> normalResult = half(PartialSuccessResult(checkThis));
+    Result<string, string> bindResult =
+        (feedS >> bindr<string, int, string, string>(half))(checkThis);
+    REQUIRE(normalResult.getSuccess() == bindResult.getSuccess());
+    REQUIRE(normalResult.getFailure() == bindResult.getFailure());
+  }));
+
+  REQUIRE(rc::check([feedF, half](string checkThis) {
+    Result<string, string> normalResult{"", checkThis};
+    Result<string, string> bindResult =
+        (feedF >> bindr<string, int, string, string>(half))(checkThis);
+    REQUIRE_FALSE(bindResult.hasSuccess());
+    REQUIRE(normalResult.getFailure() == bindResult.getFailure());
+  }));
+}
+
+TEST_CASE("bind works on partialFR func", "[bind]") {
+  std::function<Result<string, string>(PartialFailureResult<int>)> half =
+      [](PartialFailureResult<int> psr) {
+        std::stringstream buff;
+        buff << "Failure: " << psr.unpack();
+
+        std::stringstream bufs;
+        bufs << "Success: " << psr.unpack();
+
+        return Result<string, string>(bufs.str(), buff.str());
+      };
+
+  std::function feedS = ::railroad::helpers::feedSuccess<string, int>;
+  std::function feedF = ::railroad::helpers::feedFailure<string, int>;
+
+  REQUIRE(rc::check([feedS, half](string checkThis) {
+    Result<string, string> normalResult{checkThis, ""};
+    Result<string, string> bindResult =
+        (feedS >> bindr<string, string, string, int>(half))(checkThis);
+    REQUIRE(normalResult.getSuccess() == bindResult.getSuccess());
+    REQUIRE_FALSE(bindResult.hasFailure());
+  }));
+
+  REQUIRE(rc::check([feedF, half](int checkThis) {
+    Result<string, string> normalResult = half(PartialFailureResult(checkThis));
+    Result<string, string> bindResult =
+        (feedF >> bindr<string, string, string, int>(half))(checkThis);
+    REQUIRE(normalResult.getSuccess() == bindResult.getSuccess());
+    REQUIRE(normalResult.getFailure() == bindResult.getFailure());
+  }));
+}
+
+}  // namespace OneTwo
+
+// 2:1
+namespace TwoOne {}
 
 }  // namespace

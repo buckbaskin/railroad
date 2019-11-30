@@ -17,6 +17,8 @@
 
 namespace railroad {
 
+// 2:2
+
 template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
@@ -26,6 +28,8 @@ bindr(std::function<Result<OutputType, OutputFailureType>(
           nakedFunc) {
   return nakedFunc;
 }
+
+// 1:1
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
@@ -81,6 +85,40 @@ bindr(std::function<
     } else {
       return Failure<OutputType, OutputFailureType>(
           nakedFunc(input.getSuccessPartial()));
+    }
+  };
+}
+
+// 1 : 2
+
+template <typename OutputType, typename InputType, typename OutputFailureType,
+          typename InputFailureType>
+std::function<
+    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+bindr(std::function<
+      Result<OutputType, OutputFailureType>(PartialSuccessResult<InputType>)>
+          nakedFunc) {
+  return [nakedFunc](Result<InputType, InputFailureType> input) {
+    if (input.hasFailure()) {
+      return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
+    } else {
+      return nakedFunc(input.getSuccessPartial());
+    }
+  };
+}
+
+template <typename OutputType, typename InputType, typename OutputFailureType,
+          typename InputFailureType>
+std::function<
+    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+bindr(std::function<Result<OutputType, OutputFailureType>(
+          PartialFailureResult<InputFailureType>)>
+          nakedFunc) {
+  return [nakedFunc](Result<InputType, InputFailureType> input) {
+    if (input.hasFailure()) {
+      return nakedFunc(input.getFailurePartial());
+    } else {
+      return Success<OutputType, OutputFailureType>(input.getSuccessPartial());
     }
   };
 }
