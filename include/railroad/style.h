@@ -11,6 +11,8 @@
 #include "railroad/DefaultFailure.h"
 #include "railroad/DefaultSuccess.h"
 #include "railroad/Result.h"
+#include "railroad/bind.h"
+#include "railroad/is_instantiation.h"
 
 namespace railroad {
 template <typename OutputType, typename HiddenType, typename InputType>
@@ -20,33 +22,14 @@ std::function<OutputType(InputType)> operator>>(
   return [inner, outer](InputType input) { return outer(inner(input)); };
 }
 
-template <typename OutputType, typename HiddenType, typename InputType,
-          typename OutputFailureType, typename HiddenFailureType,
-          typename InputFailureType>
-std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-operator>>=(std::function<HiddenType(InputType)> inner,
-            std::function<Result<OutputType, OutputFailureType>(
-                Result<HiddenType, HiddenFailureType>)>
-                outer) {
-  auto boundInner = binds(inner);
-  return
-      [boundInner, outer](InputType input) { return outer(boundInner(input)); };
-}
-
-template <typename OutputType, typename HiddenType, typename InputType,
-          typename OutputFailureType = ::railroad::DefaultFailure,
-          typename HiddenFailureType, typename InputFailureType>
-std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-operator>>=(std::function<Result<HiddenType, HiddenFailureType>(
-                Result<InputType, InputFailureType>)>
-                inner,
-            std::function<OutputType(HiddenType)> outer) {
-  auto boundOuter = binds(outer);
-  return [inner, boundOuter](Result<InputType, InputFailureType> input) {
-    return boundOuter(inner(input));
-  };
+template <typename InnerFunc, typename OuterFunc>
+auto operator>>=(InnerFunc inner, OuterFunc outer)
+    -> decltype(inner >> bindr(outer)) {
+  static_assert(is_instantiation<std::function, InnerFunc>::value,
+                "Need InnerFunc to be an instantiation of std::func");
+  static_assert(is_instantiation<std::function, OuterFunc>::value,
+                "Need OuterFunc to be an instantiation of std::func");
+  return inner >> bindr(outer);
 }
 
 }  // namespace railroad
