@@ -22,23 +22,79 @@ std::function<OutputType(InputType)> operator>>(
   return [inner, outer](InputType input) { return outer(inner(input)); };
 }
 
-/*
-This is failing because:
-"couldn't deduce template parameter ‘OutputFailureType’"
-
-On a Partial S->S call
-
-Need to evaluate how this is templated generically, or specialize to match each
-type of bindr call
-*/
-template <typename InnerFunc, typename OuterFunc>
-auto operator>>=(InnerFunc inner, OuterFunc outer)
-    -> decltype(inner >> bindr(outer)) {
-  static_assert(is_instantiation<std::function, InnerFunc>::value,
-                "Need InnerFunc to be an instantiation of std::func");
+template <typename OutputType, typename HiddenType, typename T,
+          typename OutputFailureType, typename HiddenFailureType,
+          typename OuterFunc>
+std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    OuterFunc outer) {
   static_assert(is_instantiation<std::function, OuterFunc>::value,
-                "Need OuterFunc to be an instantiation of std::func");
-  return inner >> bindr(outer);
+                "Need OuterFunc to be an instantiation of std::function");
+  return inner >>
+         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
+}
+
+template <typename OutputType, typename HiddenType, typename T,
+          typename OutputFailureType, typename HiddenFailureType>
+std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    std::function<Result<OutputType, OutputFailureType>(
+        Result<HiddenType, HiddenFailureType>)>
+        outer) {
+  return inner >>
+         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
+}
+
+template <typename OutputType, typename HiddenType, typename T,
+          typename HiddenFailureType,
+          typename OutputFailureType = HiddenFailureType>
+std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    std::function<
+        PartialSuccessResult<OutputType>(PartialSuccessResult<HiddenType>)>
+        outer) {
+  return inner >>
+         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
+}
+
+template <typename HiddenType, typename OutputType = HiddenType, typename T,
+          typename OutputFailureType, typename HiddenFailureType>
+std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    std::function<PartialFailureResult<OutputFailureType>(
+        PartialSuccessResult<HiddenType>)>
+        outer) {
+  return inner >>
+         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
+}
+
+template <typename OutputType, typename HiddenType, typename T,
+          typename OutputFailureType, typename HiddenFailureType>
+std::function<Result<OutputType, OutputFailureType>(T)> bindAndCombine(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    std::function<Result<OutputType, OutputFailureType>(
+        Result<HiddenType, HiddenFailureType>)>
+        outer) {
+  return inner >>
+         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
+}
+
+template <typename OutputType, typename HiddenType, typename T,
+          typename OutputFailureType, typename HiddenFailureType,
+          typename OuterFunc>
+std::function<Result<OutputType, OutputFailureType>(T)> bindAndCombine(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    OuterFunc outer) {
+  static_assert(is_instantiation<std::function, OuterFunc>::value,
+                "Need OuterFunc to be an instantiation of std::function");
+  return inner >>
+         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
 }
 
 }  // namespace railroad
