@@ -74,4 +74,42 @@ TEST_CASE(">>= works on full func", "[operatorPrecedence]") {
   }));
 }
 
+TEST_CASE(">>= works on partialS->S func", "[operatorPrecedence]") {
+  std::function<PartialSuccessResult<int>(PartialSuccessResult<int>)> adder =
+      [](PartialSuccessResult<int> input) -> PartialSuccessResult<int> {
+    return PartialSuccessResult<int>(input.unpack() + 1);
+  };
+
+  REQUIRE(rc::check([adder](int checkThis) {
+    Result<int, DefaultFailure> explicitChain =
+        (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>
+         bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>
+         bindr<int, int, DefaultFailure, DefaultFailure>(adder))(
+            Success<int, DefaultFailure>(checkThis));
+
+    Result<int, DefaultFailure> preMixedChain =
+        (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>=
+         adder >> bindr<int, int, DefaultFailure, DefaultFailure>(adder))(
+            Success<int, DefaultFailure>(checkThis));
+
+    Result<int, DefaultFailure> postMixedChain =
+        (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>
+             bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>=
+         adder)(Success<int, DefaultFailure>(checkThis));
+
+    Result<int, DefaultFailure> implicitChain =
+        (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>= adder >>=
+         adder)(Success<int, DefaultFailure>(checkThis));
+
+    REQUIRE(explicitChain.hasSuccess());
+    REQUIRE(preMixedChain.hasSuccess());
+    REQUIRE(postMixedChain.hasSuccess());
+    REQUIRE(implicitChain.hasSuccess());
+
+    REQUIRE(implicitChain.getSuccess() == explicitChain.getSuccess());
+    REQUIRE(implicitChain.getSuccess() == preMixedChain.getSuccess());
+    REQUIRE(implicitChain.getSuccess() == postMixedChain.getSuccess());
+  }));
+}
+
 }  // namespace
