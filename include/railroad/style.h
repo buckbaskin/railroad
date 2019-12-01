@@ -22,6 +22,15 @@ std::function<OutputType(InputType)> operator>>(
   return [inner, outer](InputType input) { return outer(inner(input)); };
 }
 
+/*
+This is failing because:
+"couldn't deduce template parameter ‘OutputFailureType’"
+
+On a Partial S->S call
+
+Need to evaluate how this is templated generically, or specialize to match each
+type of bindr call
+*/
 template <typename InnerFunc, typename OuterFunc>
 auto operator>>=(InnerFunc inner, OuterFunc outer)
     -> decltype(inner >> bindr(outer)) {

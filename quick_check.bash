@@ -1,5 +1,5 @@
-# check.bash
-cat check.bash
+# quick_check.bash
+cat quick_check.bash
 
 HEADER_FILES=$(ag --cpp -l -g ".*" include/)
 SOURCE_FILES=$(ag --cpp -l -g ".*" src/ example/)
