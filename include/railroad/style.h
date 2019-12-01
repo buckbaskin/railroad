@@ -22,7 +22,7 @@ std::function<OutputType(InputType)> operator>>(
   return [inner, outer](InputType input) { return outer(inner(input)); };
 }
 
-template <typename InnerFunc, typename OuterFunc>
+template <typename OutputType, typename OutputFailureType, typename HiddenType, typename InputType>
 auto operator>>=(InnerFunc inner, OuterFunc outer)
     -> decltype(inner >> bindr(outer)) {
   static_assert(is_instantiation<std::function, InnerFunc>::value,

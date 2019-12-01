@@ -88,17 +88,17 @@ TEST_CASE(">>= works on partialS->S func", "[operatorPrecedence]") {
             Success<int, DefaultFailure>(checkThis));
 
     Result<int, DefaultFailure> preMixedChain =
-        (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>=
-         adder >> bindr<int, int, DefaultFailure, DefaultFailure>(adder))(
+        ((bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>= adder) >>
+         bindr<int, int, DefaultFailure, DefaultFailure>(adder))(
             Success<int, DefaultFailure>(checkThis));
 
     Result<int, DefaultFailure> postMixedChain =
         (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>
-             bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>=
-         adder)(Success<int, DefaultFailure>(checkThis));
+         (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>= adder))(
+            Success<int, DefaultFailure>(checkThis));
 
     Result<int, DefaultFailure> implicitChain =
-        (bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>= adder >>=
+        ((bindr<int, int, DefaultFailure, DefaultFailure>(adder) >>= adder) >>=
          adder)(Success<int, DefaultFailure>(checkThis));
 
     REQUIRE(explicitChain.hasSuccess());
