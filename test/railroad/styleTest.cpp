@@ -42,6 +42,20 @@ TEST_CASE(">>= works on full func simple", "[operatorPrecedence]") {
     REQUIRE(explicitChain.hasSuccess());
     REQUIRE(implicitChain.hasSuccess());
     REQUIRE(explicitChain.getSuccess() == implicitChain.getSuccess());
+
+    REQUIRE_FALSE(explicitChain.hasFailure());
+    REQUIRE_FALSE(implicitChain.hasFailure());
+  }));
+
+  REQUIRE(rc::check([adder](int checkThis) {
+    Result<int, int> explicitChain =
+        (adder >> rbind(adder))(Failure<int, int>(checkThis));
+    Result<int, int> implicitChain =
+        (adder >>= adder)(Failure<int, int>(checkThis));
+
+    REQUIRE(explicitChain.hasFailure());
+    REQUIRE(implicitChain.hasFailure());
+    REQUIRE(explicitChain.getFailure() == implicitChain.getFailure());
   }));
 }
 
@@ -76,6 +90,32 @@ TEST_CASE(">>= works on full func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.getSuccess() == explicitChain.getSuccess());
     REQUIRE(implicitChain.getSuccess() == preMixedChain.getSuccess());
     REQUIRE(implicitChain.getSuccess() == postMixedChain.getSuccess());
+
+    REQUIRE_FALSE(explicitChain.hasFailure());
+    REQUIRE_FALSE(implicitChain.hasFailure());
+  }));
+
+  REQUIRE(rc::check([adder](int checkThis) {
+    Result<int, int> explicitChain =
+        (adder >> rbind(adder) >> rbind(adder))(Failure<int, int>(checkThis));
+
+    Result<int, int> preMixedChain =
+        (adder >>= adder >> rbind(adder))(Failure<int, int>(checkThis));
+
+    Result<int, int> postMixedChain =
+        (adder >> rbind(adder) >>= adder)(Failure<int, int>(checkThis));
+
+    Result<int, int> implicitChain =
+        (adder >>= adder >>= adder)(Failure<int, int>(checkThis));
+
+    REQUIRE(explicitChain.hasFailure());
+    REQUIRE(preMixedChain.hasFailure());
+    REQUIRE(postMixedChain.hasFailure());
+    REQUIRE(implicitChain.hasFailure());
+
+    REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+    REQUIRE(implicitChain.getFailure() == preMixedChain.getFailure());
+    REQUIRE(implicitChain.getFailure() == postMixedChain.getFailure());
   }));
 }
 
@@ -108,6 +148,23 @@ TEST_CASE(">>= works on 2:2 -> S:2 func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.hasSuccess());
 
     REQUIRE(implicitChain.getSuccess() == explicitChain.getSuccess());
+
+    REQUIRE_FALSE(explicitChain.hasFailure());
+    REQUIRE_FALSE(implicitChain.hasFailure());
+  }));
+
+  REQUIRE(rc::check([TwoTwo, STwo](string checkThis) {
+    Result<int, string> explicitChain =
+        (TwoTwo >> rbind<int, int, string, string>(STwo))(
+            Failure<int, string>(checkThis));
+
+    Result<int, string> implicitChain =
+        (TwoTwo >>= STwo)(Failure<int, string>(checkThis));
+
+    REQUIRE(explicitChain.hasFailure());
+    REQUIRE(implicitChain.hasFailure());
+
+    REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
   }));
 }
 
@@ -141,6 +198,20 @@ TEST_CASE(">>= works on 2:2 -> F:2 func", "[operatorPrecedence]") {
 
     REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
   }));
+
+  REQUIRE(rc::check([TwoTwo, FTwo](string checkThis) {
+    Result<int, string> explicitChain =
+        (TwoTwo >> rbind<int, int, string, string>(FTwo))(
+            Failure<int, string>(checkThis));
+
+    Result<int, string> implicitChain =
+        (TwoTwo >>= FTwo)(Failure<int, string>(checkThis));
+
+    REQUIRE(explicitChain.hasFailure());
+    REQUIRE(implicitChain.hasFailure());
+
+    REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+  }));
 }
 
 // 2:1 -> 2:2
@@ -164,7 +235,7 @@ TEST_CASE(">>= works on 2:S -> 2:2 func", "[operatorPrecedence]") {
         }
       };
 
-  REQUIRE(rc::check([TwoTwo, TwoS](int checkThis) {
+  CHECK(rc::check([TwoTwo, TwoS](int checkThis) {
     Result<int, string> explicitChain =
         (rbind<int, int, string, string>(TwoS) >>
          TwoTwo)(Success<int, string>(checkThis));
@@ -175,7 +246,27 @@ TEST_CASE(">>= works on 2:S -> 2:2 func", "[operatorPrecedence]") {
     REQUIRE(explicitChain.hasSuccess());
     REQUIRE(implicitChain.hasSuccess());
 
+    CHECK(implicitChain.getSuccess() == explicitChain.getSuccess());
+
+    REQUIRE_FALSE(explicitChain.hasFailure());
+    REQUIRE_FALSE(implicitChain.hasFailure());
+  }));
+
+  REQUIRE(rc::check([TwoTwo, TwoS](string checkThis) {
+    Result<int, string> explicitChain =
+        (rbind<int, int, string, string>(TwoS) >>
+         TwoTwo)(Failure<int, string>(checkThis));
+
+    Result<int, string> implicitChain =
+        (TwoS >>= TwoTwo)(Failure<int, string>(checkThis));
+
+    REQUIRE(explicitChain.hasSuccess());
+    REQUIRE(implicitChain.hasSuccess());
+
     REQUIRE(implicitChain.getSuccess() == explicitChain.getSuccess());
+
+    REQUIRE_FALSE(explicitChain.hasFailure());
+    REQUIRE_FALSE(implicitChain.hasFailure());
   }));
 }
 
@@ -192,7 +283,7 @@ TEST_CASE(">>= works on 2:F -> 2:2 func", "[operatorPrecedence]") {
   std::function<PartialFailureResult<string>(Result<int, string>)> TwoF =
       [](Result<int, string> in) {
         if (in.hasFailure()) {
-          return PartialFailureResult<string>{"F: " + in.hasFailure()};
+          return PartialFailureResult<string>{"F: " + in.getFailure()};
         } else {
           return PartialFailureResult<string>{"Success, why?"};
         }
@@ -205,6 +296,20 @@ TEST_CASE(">>= works on 2:F -> 2:2 func", "[operatorPrecedence]") {
 
     Result<int, string> implicitChain =
         (TwoF >>= TwoTwo)(Success<int, string>(checkThis));
+
+    REQUIRE(explicitChain.hasFailure());
+    REQUIRE(implicitChain.hasFailure());
+
+    REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+  }));
+
+  REQUIRE(rc::check([TwoTwo, TwoF](string checkThis) {
+    Result<int, string> explicitChain =
+        (rbind<int, int, string, string>(TwoF) >>
+         TwoTwo)(Failure<int, string>(checkThis));
+
+    Result<int, string> implicitChain =
+        (TwoF >>= TwoTwo)(Failure<int, string>(checkThis));
 
     REQUIRE(explicitChain.hasFailure());
     REQUIRE(implicitChain.hasFailure());
