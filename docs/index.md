@@ -27,8 +27,8 @@ Distributed under the MIT License. See the accompanying file [LICENSE.md](LICENS
     - `operator>>=`
   - Bindings
     - `bind.h`
-    - `bindf.h`
-    - `binds.h`
+    - `rbindf.h`
+    - `rbinds.h`
   - Helpers
     - `feed.h`
     - `terminate.h`

@@ -1,5 +1,5 @@
 /*
- * bindfTest.cpp
+ * rbindfTest.cpp
  *
  * Copyright 2019 Buck Baskin
  */
@@ -15,12 +15,12 @@
 
 namespace {
 
-using ::railroad::bindf;  // aka bindFailure
 using ::railroad::DefaultSuccess;
+using ::railroad::rbindf;  // aka bindFailure
 using ::railroad::Success;
 using PFRi = ::railroad::PartialFailureResult<int>;
 
-TEST_CASE("bindf works on pure func", "[bindf]") {
+TEST_CASE("rbindf works on pure func", "[rbindf]") {
   std::function<int(int)> adder = [](int i) { return i + 1; };
 
   std::function feed = ::railroad::helpers::feedFailure<DefaultSuccess, int>;
@@ -30,7 +30,7 @@ TEST_CASE("bindf works on pure func", "[bindf]") {
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
     int normalResult = adder(checkThis);
     std::optional<int> bindResult =
-        (feed >> bindf<DefaultSuccess, DefaultSuccess>(adder) >>
+        (feed >> rbindf<DefaultSuccess, DefaultSuccess>(adder) >>
          terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
@@ -38,13 +38,13 @@ TEST_CASE("bindf works on pure func", "[bindf]") {
 
   REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
     std::optional<int> bindResult =
-        (bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+        (rbindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
          terminate)(Success<DefaultSuccess, int>(DefaultSuccess{checkThis}));
     REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));
 }
 
-TEST_CASE("bindf works on partial func", "[bindf]") {
+TEST_CASE("rbindf works on partial func", "[rbindf]") {
   std::function<PFRi(PFRi)> adder = [](PFRi val) {
     return PFRi{val.unpack() + 1};
   };
@@ -56,7 +56,7 @@ TEST_CASE("bindf works on partial func", "[bindf]") {
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
     int normalResult = adder(PFRi{checkThis}).unpack();
     std::optional<int> bindResult =
-        (feed >> bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+        (feed >> rbindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
          terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
@@ -64,13 +64,13 @@ TEST_CASE("bindf works on partial func", "[bindf]") {
 
   REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
     std::optional<int> bindResult =
-        (bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+        (rbindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
          terminate)(Success<DefaultSuccess, int>(DefaultSuccess{checkThis}));
     REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));
 }
 
-TEST_CASE("bindf works on lambda", "[bindf]") {
+TEST_CASE("rbindf works on lambda", "[rbindf]") {
   auto adder = [](int incThis) -> int { return incThis + 1; };
 
   std::function feed = ::railroad::helpers::feedFailure<DefaultSuccess, int>;
@@ -80,7 +80,7 @@ TEST_CASE("bindf works on lambda", "[bindf]") {
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
     int normalResult = adder(checkThis);
     std::optional<int> bindResult =
-        (feed >> bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+        (feed >> rbindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
          terminate)(checkThis);
 
     REQUIRE(static_cast<bool>(bindResult));
@@ -89,7 +89,7 @@ TEST_CASE("bindf works on lambda", "[bindf]") {
 
   REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
     std::optional<int> bindResult =
-        (bindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
+        (rbindf<DefaultSuccess, DefaultSuccess, int, int>(adder) >>
          terminate)(Success<DefaultSuccess, int>(DefaultSuccess{checkThis}));
     REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));

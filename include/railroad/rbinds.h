@@ -1,5 +1,5 @@
 /*
- * binds.h
+ * rbinds.h
  *
  * Copyright 2019 Buck Baskin
  */
@@ -20,10 +20,10 @@ template <typename OutputType, typename InputType,
           typename InputFailureType = ::railroad::DefaultFailure>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-binds(std::function<OutputType(InputType)> nakedFunc) {
+rbinds(std::function<OutputType(InputType)> nakedFunc) {
   // TODO: Remove this via changing template
   static_assert(std::is_same<OutputFailureType, InputFailureType>::value,
-                "binds won't convert output types");
+                "rbinds won't convert output types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
@@ -39,11 +39,11 @@ template <typename OutputType, typename InputType,
           typename InputFailureType = ::railroad::DefaultFailure>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-binds(std::function<
-      PartialSuccessResult<OutputType>(PartialSuccessResult<InputType>)>
-          nakedFunc) {
+rbinds(std::function<
+       PartialSuccessResult<OutputType>(PartialSuccessResult<InputType>)>
+           nakedFunc) {
   static_assert(std::is_same<OutputFailureType, InputFailureType>::value,
-                "binds won't convert output types");
+                "rbinds won't convert output types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
@@ -60,9 +60,9 @@ template <typename OutputType, typename InputType,
           typename WrappedFunc>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-binds(WrappedFunc nakedFunc) {
+rbinds(WrappedFunc nakedFunc) {
   static_assert(std::is_same<OutputFailureType, InputFailureType>::value,
-                "binds won't convert output types");
+                "rbinds won't convert output types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());

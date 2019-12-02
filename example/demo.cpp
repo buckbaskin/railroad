@@ -11,7 +11,7 @@
 
 #include "railroad/railroad.h"
 
-using ::railroad::binds;  // aka bindSuccess
+using ::railroad::rbinds;  // aka bindSuccess
 
 int main(int /* argc */, char** /* argv */) {
   std::function<int(int)> adder = [](int i) { return i + 1; };
@@ -27,10 +27,10 @@ int main(int /* argc */, char** /* argv */) {
   // clang-format off
   std::cout << "\">> Composed\" Functions:" << std::endl <<
            *((feed
-              >> binds(adder)
-              >> binds(adder)
-              >> binds<int, int>([](int i) { return i - 1; })
-              >> binds(stringify) >>
+              >> rbinds(adder)
+              >> rbinds(adder)
+              >> rbinds<int, int>([](int i) { return i - 1; })
+              >> rbinds(stringify) >>
               terminate)(41))
             << std::endl;
   // clang-format on

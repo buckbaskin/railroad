@@ -11,8 +11,8 @@
 #include "railroad/DefaultFailure.h"
 #include "railroad/DefaultSuccess.h"
 #include "railroad/Result.h"
-#include "railroad/bind.h"
 #include "railroad/is_instantiation.h"
+#include "railroad/rbind.h"
 
 namespace railroad {
 template <typename OutputType, typename HiddenType, typename InputType>

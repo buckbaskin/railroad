@@ -12,8 +12,8 @@
 #include "railroad/PartialFailureResult.h"
 #include "railroad/PartialSuccessResult.h"
 #include "railroad/Result.h"
-#include "railroad/bindf.h"
-#include "railroad/binds.h"
+#include "railroad/rbindf.h"
+#include "railroad/rbinds.h"
 
 namespace railroad {
 
@@ -38,7 +38,7 @@ std::function<
 rbind(std::function<
       PartialSuccessResult<OutputType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
-  return binds<OutputType, InputType, OutputFailureType, InputFailureType>(
+  return rbinds<OutputType, InputType, OutputFailureType, InputFailureType>(
       nakedFunc);
 }
 
@@ -49,7 +49,7 @@ std::function<
 rbind(std::function<PartialFailureResult<OutputFailureType>(
           PartialFailureResult<InputFailureType>)>
           nakedFunc) {
-  return bindf<OutputType, InputType, OutputFailureType, InputFailureType>(
+  return rbindf<OutputType, InputType, OutputFailureType, InputFailureType>(
       nakedFunc);
 }
 

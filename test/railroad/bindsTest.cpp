@@ -1,5 +1,5 @@
 /*
- * bindsTest.cpp
+ * rbindsTest.cpp
  *
  * Copyright 2019 Buck Baskin
  */
@@ -15,12 +15,12 @@
 
 namespace {
 
-using ::railroad::binds;  // aka bindSuccess
 using ::railroad::DefaultFailure;
 using ::railroad::Failure;
+using ::railroad::rbinds;  // aka bindSuccess
 using PSRi = ::railroad::PartialSuccessResult<int>;
 
-TEST_CASE("binds works on pure func", "[binds]") {
+TEST_CASE("rbinds works on pure func", "[rbinds]") {
   std::function<int(int)> adder = [](int i) { return i + 1; };
 
   std::function feed = ::railroad::helpers::feedSuccess<int>;
@@ -29,19 +29,19 @@ TEST_CASE("binds works on pure func", "[binds]") {
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
     int normalResult = adder(checkThis);
     std::optional<int> bindResult =
-        (feed >> binds(adder) >> terminate)(checkThis);
+        (feed >> rbinds(adder) >> terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
 
   REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
-    std::optional<int> bindResult = (binds(adder) >> terminate)(
+    std::optional<int> bindResult = (rbinds(adder) >> terminate)(
         Failure<int, DefaultFailure>(DefaultFailure{checkThis}));
     REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));
 }
 
-TEST_CASE("binds works on partial func", "[binds]") {
+TEST_CASE("rbinds works on partial func", "[rbinds]") {
   std::function<PSRi(PSRi)> adder = [](PSRi val) {
     return PSRi{val.unpack() + 1};
   };
@@ -52,19 +52,19 @@ TEST_CASE("binds works on partial func", "[binds]") {
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
     int normalResult = adder(PSRi{checkThis}).unpack();
     std::optional<int> bindResult =
-        (feed >> binds(adder) >> terminate)(checkThis);
+        (feed >> rbinds(adder) >> terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
 
   REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
-    std::optional<int> bindResult = (binds(adder) >> terminate)(
+    std::optional<int> bindResult = (rbinds(adder) >> terminate)(
         Failure<int, DefaultFailure>(DefaultFailure{checkThis}));
     REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));
 }
 
-TEST_CASE("binds works on lambda", "[binds]") {
+TEST_CASE("rbinds works on lambda", "[rbinds]") {
   auto adder = [](int i) -> int { return i + 1; };
 
   std::function feed = ::railroad::helpers::feedSuccess<int>;
@@ -73,13 +73,13 @@ TEST_CASE("binds works on lambda", "[binds]") {
   REQUIRE(rc::check([feed, adder, terminate](int checkThis) {
     int normalResult = adder(checkThis);
     std::optional<int> bindResult =
-        (feed >> binds<int, int>(adder) >> terminate)(checkThis);
+        (feed >> rbinds<int, int>(adder) >> terminate)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
 
   REQUIRE(rc::check([feed, adder, terminate](bool checkThis) {
-    std::optional<int> bindResult = (binds<int, int>(adder) >> terminate)(
+    std::optional<int> bindResult = (rbinds<int, int>(adder) >> terminate)(
         Failure<int, DefaultFailure>(DefaultFailure{checkThis}));
     REQUIRE_FALSE(static_cast<bool>(bindResult));
   }));

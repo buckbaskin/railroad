@@ -1,5 +1,5 @@
 /*
- * bindf.h
+ * rbindf.h
  *
  * Copyright 2019 Buck Baskin
  */
@@ -20,9 +20,9 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindf(std::function<PartialFailureResult<OutputFailureType>(
-          PartialFailureResult<InputFailureType>)>
-          nakedFunc) {
+rbindf(std::function<PartialFailureResult<OutputFailureType>(
+           PartialFailureResult<InputFailureType>)>
+           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(
@@ -37,13 +37,13 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindf(std::function<OutputFailureType(InputFailureType)> nakedFunc) {
+rbindf(std::function<OutputFailureType(InputFailureType)> nakedFunc) {
   static_assert(
       !(is_instantiation<PartialFailureResult, InputFailureType>::value),
-      "Don't use this bindf for known half functions");
+      "Don't use this rbindf for known half functions");
   static_assert(
       !(is_instantiation<PartialFailureResult, OutputFailureType>::value),
-      "Don't use this bindf for known half functions");
+      "Don't use this rbindf for known half functions");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(
@@ -58,22 +58,22 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType, typename WrappedFunc>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindf(WrappedFunc nakedFunc) {
+rbindf(WrappedFunc nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     static_assert(
         !(is_instantiation<PartialFailureResult, InputFailureType>::value),
-        "Don't use this bindf for known half functions");
+        "Don't use this rbindf for known half functions");
     static_assert(
         !(is_instantiation<PartialFailureResult, OutputFailureType>::value),
-        "Don't use this bindf for known half functions");
+        "Don't use this rbindf for known half functions");
     static_assert(
         !(std::is_same<WrappedFunc,
                        std::function<PartialFailureResult<OutputFailureType>(
                            PartialFailureResult<InputFailureType>)>>::value),
-        "Shouldn't bindf std::function<PFR<T>(PFR<T>)> to WrappedFunc");
+        "Shouldn't rbindf std::function<PFR<T>(PFR<T>)> to WrappedFunc");
     static_assert(!(std::is_same<WrappedFunc, std::function<OutputFailureType(
                                                   InputFailureType)>>::value),
-                  "Shouldn't bindf std::function<T(T)> to WrappedFunc");
+                  "Shouldn't rbindf std::function<T(T)> to WrappedFunc");
 
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(
