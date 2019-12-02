@@ -12,10 +12,10 @@
 
 namespace {
 
-using ::railroad::bindr;
 using ::railroad::DefaultFailure;
 using ::railroad::DefaultSuccess;
 using ::railroad::Failure;
+using ::railroad::rbind;
 using ::railroad::Result;
 using ::railroad::Success;
 using ::railroad::result::PartialFailureResult;
@@ -33,7 +33,7 @@ TEST_CASE(">>= works on full func simple", "[operatorPrecedence]") {
 
   REQUIRE(rc::check([adder](int checkThis) {
     Result<int, int> explicitChain =
-        (adder >> bindr(adder))(Success<int, int>(checkThis));
+        (adder >> rbind(adder))(Success<int, int>(checkThis));
     Result<int, int> implicitChain =
         (adder >>= adder)(Success<int, int>(checkThis));
 
@@ -55,13 +55,13 @@ TEST_CASE(">>= works on full func", "[operatorPrecedence]") {
 
   REQUIRE(rc::check([adder](int checkThis) {
     Result<int, int> explicitChain =
-        (adder >> bindr(adder) >> bindr(adder))(Success<int, int>(checkThis));
+        (adder >> rbind(adder) >> rbind(adder))(Success<int, int>(checkThis));
 
     Result<int, int> preMixedChain =
-        (adder >>= adder >> bindr(adder))(Success<int, int>(checkThis));
+        (adder >>= adder >> rbind(adder))(Success<int, int>(checkThis));
 
     Result<int, int> postMixedChain =
-        (adder >> bindr(adder) >>= adder)(Success<int, int>(checkThis));
+        (adder >> rbind(adder) >>= adder)(Success<int, int>(checkThis));
 
     Result<int, int> implicitChain =
         (adder >>= adder >>= adder)(Success<int, int>(checkThis));

@@ -23,7 +23,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<Result<OutputType, OutputFailureType>(
+rbind(std::function<Result<OutputType, OutputFailureType>(
           Result<InputType, InputFailureType>)>
           nakedFunc) {
   return nakedFunc;
@@ -35,7 +35,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<
+rbind(std::function<
       PartialSuccessResult<OutputType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
   return binds<OutputType, InputType, OutputFailureType, InputFailureType>(
@@ -46,7 +46,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<PartialFailureResult<OutputFailureType>(
+rbind(std::function<PartialFailureResult<OutputFailureType>(
           PartialFailureResult<InputFailureType>)>
           nakedFunc) {
   return bindf<OutputType, InputType, OutputFailureType, InputFailureType>(
@@ -57,7 +57,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<
+rbind(std::function<
       PartialSuccessResult<OutputType>(PartialFailureResult<InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
@@ -73,7 +73,7 @@ bindr(std::function<
 template <typename InputType, typename InputFailureType>
 std::function<
     Result<InputType, InputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<
+rbind(std::function<
       PartialFailureResult<InputFailureType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
   static_assert(std::is_same<InputType, InputType>::value,
@@ -96,7 +96,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<
+rbind(std::function<
       Result<OutputType, OutputFailureType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
@@ -112,7 +112,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<Result<OutputType, OutputFailureType>(
+rbind(std::function<Result<OutputType, OutputFailureType>(
           PartialFailureResult<InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
@@ -130,7 +130,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<
+rbind(std::function<
       PartialSuccessResult<OutputType>(Result<InputType, InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
@@ -142,7 +142,7 @@ template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
-bindr(std::function<PartialFailureResult<OutputFailureType>(
+rbind(std::function<PartialFailureResult<OutputFailureType>(
           Result<InputType, InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {

@@ -33,7 +33,7 @@ std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
   static_assert(is_instantiation<std::function, OuterFunc>::value,
                 "Need OuterFunc to be an instantiation of std::function");
   return inner >>
-         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+         rbind<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
              outer);
 }
 

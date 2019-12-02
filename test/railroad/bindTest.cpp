@@ -15,8 +15,8 @@
 
 namespace {
 
-using ::railroad::bindr;
 using ::railroad::Failure;
+using ::railroad::rbind;
 using ::railroad::Result;
 using ::railroad::Success;
 using ::railroad::result::PartialFailureResult;
@@ -51,7 +51,7 @@ TEST_CASE("bind works on complete func", "[bind]") {
       rc::check([feedS, feedF, full, terminateS, terminateF](int checkThis) {
         string normalResult = full(Success<int, int>(checkThis)).getSuccess();
         std::optional<string> bindResult =
-            (feedS >> bindr(full) >> terminateS)(checkThis);
+            (feedS >> rbind(full) >> terminateS)(checkThis);
         REQUIRE(static_cast<bool>(bindResult));
         REQUIRE(normalResult == *(bindResult));
       }));
@@ -60,7 +60,7 @@ TEST_CASE("bind works on complete func", "[bind]") {
       rc::check([feedS, feedF, full, terminateS, terminateF](int checkThis) {
         string normalResult = full(Failure<int, int>(checkThis)).getFailure();
         std::optional<string> bindResult =
-            (feedF >> bindr(full) >> terminateF)(checkThis);
+            (feedF >> rbind(full) >> terminateF)(checkThis);
         REQUIRE(static_cast<bool>(bindResult));
         REQUIRE(normalResult == *(bindResult));
       }));
@@ -87,7 +87,7 @@ TEST_CASE("bind works on partialSS func", "[bind]") {
                      terminateF](int checkThis) {
     string normalResult = half(PartialSuccessResult(checkThis)).unpack();
     std::optional<string> bindResult =
-        (feedS >> bindr<string, int, int, int>(half) >> terminateS)(checkThis);
+        (feedS >> rbind<string, int, int, int>(half) >> terminateS)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
@@ -96,7 +96,7 @@ TEST_CASE("bind works on partialSS func", "[bind]") {
                      terminateF](int checkThis) {
     int normalResult = checkThis;
     std::optional<int> bindResult =
-        (feedF >> bindr<string, int, int, int>(half) >> terminateF)(checkThis);
+        (feedF >> rbind<string, int, int, int>(half) >> terminateF)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
@@ -119,7 +119,7 @@ TEST_CASE("bind works on partialFF func", "[bind]") {
                      terminateF](int checkThis) {
     int normalResult = checkThis;
     std::optional<int> bindResult =
-        (feedS >> bindr<int, int, string, int>(half) >> terminateS)(checkThis);
+        (feedS >> rbind<int, int, string, int>(half) >> terminateS)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
@@ -128,7 +128,7 @@ TEST_CASE("bind works on partialFF func", "[bind]") {
                      terminateF](int checkThis) {
     string normalResult = half(PartialFailureResult(checkThis)).unpack();
     std::optional<string> bindResult =
-        (feedF >> bindr<int, int, string, int>(half) >> terminateF)(checkThis);
+        (feedF >> rbind<int, int, string, int>(half) >> terminateF)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
@@ -149,7 +149,7 @@ TEST_CASE("bind works on partialSF func", "[bind]") {
   REQUIRE(rc::check([feedS, half, terminateF](int checkThis) {
     string normalResult = half(PartialSuccessResult(checkThis)).unpack();
     std::optional<string> bindResult =
-        (feedS >> bindr<int, string>(half) >> terminateF)(checkThis);
+        (feedS >> rbind<int, string>(half) >> terminateF)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
@@ -157,7 +157,7 @@ TEST_CASE("bind works on partialSF func", "[bind]") {
   REQUIRE(rc::check([feedF, half, terminateF](string checkThis) {
     string normalResult = checkThis;
     std::optional<string> bindResult =
-        (feedF >> bindr<int, string>(half) >> terminateF)(checkThis);
+        (feedF >> rbind<int, string>(half) >> terminateF)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
@@ -178,7 +178,7 @@ TEST_CASE("bind works on partialFS func", "[bind]") {
   REQUIRE(rc::check([feedF, half, terminateS](int checkThis) {
     string normalResult = half(PartialFailureResult(checkThis)).unpack();
     std::optional<string> bindResult =
-        (feedF >> bindr<string, string, int, int>(half) >>
+        (feedF >> rbind<string, string, int, int>(half) >>
          terminateS)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
@@ -187,7 +187,7 @@ TEST_CASE("bind works on partialFS func", "[bind]") {
   REQUIRE(rc::check([feedS, half, terminateS](string checkThis) {
     string normalResult = checkThis;
     std::optional<string> bindResult =
-        (feedS >> bindr<string, string, int, int>(half) >>
+        (feedS >> rbind<string, string, int, int>(half) >>
          terminateS)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
@@ -215,7 +215,7 @@ TEST_CASE("bind works on partialSR func", "[bind]") {
   REQUIRE(rc::check([feedS, half](int checkThis) {
     Result<string, string> normalResult = half(PartialSuccessResult(checkThis));
     Result<string, string> bindResult =
-        (feedS >> bindr<string, int, string, string>(half))(checkThis);
+        (feedS >> rbind<string, int, string, string>(half))(checkThis);
     REQUIRE(normalResult.getSuccess() == bindResult.getSuccess());
     REQUIRE(normalResult.getFailure() == bindResult.getFailure());
   }));
@@ -223,7 +223,7 @@ TEST_CASE("bind works on partialSR func", "[bind]") {
   REQUIRE(rc::check([feedF, half](string checkThis) {
     Result<string, string> normalResult{"", checkThis};
     Result<string, string> bindResult =
-        (feedF >> bindr<string, int, string, string>(half))(checkThis);
+        (feedF >> rbind<string, int, string, string>(half))(checkThis);
     REQUIRE_FALSE(bindResult.hasSuccess());
     REQUIRE(normalResult.getFailure() == bindResult.getFailure());
   }));
@@ -247,7 +247,7 @@ TEST_CASE("bind works on partialFR func", "[bind]") {
   REQUIRE(rc::check([feedS, half](string checkThis) {
     Result<string, string> normalResult{checkThis, ""};
     Result<string, string> bindResult =
-        (feedS >> bindr<string, string, string, int>(half))(checkThis);
+        (feedS >> rbind<string, string, string, int>(half))(checkThis);
     REQUIRE(normalResult.getSuccess() == bindResult.getSuccess());
     REQUIRE_FALSE(bindResult.hasFailure());
   }));
@@ -255,7 +255,7 @@ TEST_CASE("bind works on partialFR func", "[bind]") {
   REQUIRE(rc::check([feedF, half](int checkThis) {
     Result<string, string> normalResult = half(PartialFailureResult(checkThis));
     Result<string, string> bindResult =
-        (feedF >> bindr<string, string, string, int>(half))(checkThis);
+        (feedF >> rbind<string, string, string, int>(half))(checkThis);
     REQUIRE(normalResult.getSuccess() == bindResult.getSuccess());
     REQUIRE(normalResult.getFailure() == bindResult.getFailure());
   }));
@@ -283,14 +283,14 @@ TEST_CASE("bind works on partialRS func", "[bind]") {
 
   REQUIRE(rc::check([feedS, half, terminateS](int checkThis) {
     string normalResult = half(Success<int, int>(checkThis)).unpack();
-    string bindResult = (feedS >> bindr<string, int, string, int>(half) >>
+    string bindResult = (feedS >> rbind<string, int, string, int>(half) >>
                          terminateS)(checkThis);
     REQUIRE(normalResult == bindResult);
   }));
 
   REQUIRE(rc::check([feedF, half, terminateS](int checkThis) {
     string normalResult = half(Failure<int, int>(checkThis)).unpack();
-    string bindResult = (feedF >> bindr<string, int, string, int>(half) >>
+    string bindResult = (feedF >> rbind<string, int, string, int>(half) >>
                          terminateS)(checkThis);
     REQUIRE(normalResult == bindResult);
   }));
@@ -314,14 +314,14 @@ TEST_CASE("bind works on partialRF func", "[bind]") {
 
   REQUIRE(rc::check([feedS, half, terminateF](int checkThis) {
     string normalResult = half(Success<int, int>(checkThis)).unpack();
-    string bindResult = (feedS >> bindr<string, int, string, int>(half) >>
+    string bindResult = (feedS >> rbind<string, int, string, int>(half) >>
                          terminateF)(checkThis);
     REQUIRE(normalResult == bindResult);
   }));
 
   REQUIRE(rc::check([feedF, half, terminateF](int checkThis) {
     string normalResult = half(Failure<int, int>(checkThis)).unpack();
-    string bindResult = (feedF >> bindr<string, int, string, int>(half) >>
+    string bindResult = (feedF >> rbind<string, int, string, int>(half) >>
                          terminateF)(checkThis);
     REQUIRE(normalResult == bindResult);
   }));
