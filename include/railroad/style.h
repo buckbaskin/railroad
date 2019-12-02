@@ -22,6 +22,8 @@ std::function<OutputType(InputType)> operator>>(
   return [inner, outer](InputType input) { return outer(inner(input)); };
 }
 
+// Generic >>=
+
 template <typename OutputType, typename HiddenType, typename T,
           typename OutputFailureType, typename HiddenFailureType,
           typename OuterFunc>
@@ -35,6 +37,8 @@ std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
              outer);
 }
 
+// Specialization for 2:2
+
 template <typename OutputType, typename HiddenType, typename T,
           typename OutputFailureType, typename HiddenFailureType>
 std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
@@ -42,46 +46,7 @@ std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
     std::function<Result<OutputType, OutputFailureType>(
         Result<HiddenType, HiddenFailureType>)>
         outer) {
-  return inner >>
-         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
-             outer);
-}
-
-template <typename OutputType, typename HiddenType, typename T,
-          typename HiddenFailureType,
-          typename OutputFailureType = HiddenFailureType>
-std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
-    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
-    std::function<
-        PartialSuccessResult<OutputType>(PartialSuccessResult<HiddenType>)>
-        outer) {
-  return inner >>
-         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
-             outer);
-}
-
-template <typename HiddenType, typename OutputType = HiddenType, typename T,
-          typename OutputFailureType, typename HiddenFailureType>
-std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
-    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
-    std::function<PartialFailureResult<OutputFailureType>(
-        PartialSuccessResult<HiddenType>)>
-        outer) {
-  return inner >>
-         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
-             outer);
-}
-
-template <typename InputType, typename InputFailureType>
-std::function<
-    Result<InputType, InputFailureType>(Result<InputType, InputFailureType>)>
-operator>>=(std::function<PartialFailureResult<InputFailureType>(
-                PartialSuccessResult<InputType>)>
-                inner,
-            std::function<PartialFailureResult<InputFailureType>(
-                PartialSuccessResult<InputType>)>
-                outer) {
-  return bindr<InputType, InputType, InputFailureType, InputFailureType>(inner);
+  return inner >> outer;
 }
 
 }  // namespace railroad
