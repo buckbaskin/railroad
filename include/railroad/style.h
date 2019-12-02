@@ -15,6 +15,10 @@
 #include "railroad/rbind.h"
 
 namespace railroad {
+
+using ::railroad::PartialFailureResult;
+using ::railroad::PartialSuccessResult;
+
 template <typename OutputType, typename HiddenType, typename InputType>
 std::function<OutputType(InputType)> operator>>(
     std::function<HiddenType(InputType)> inner,
@@ -37,7 +41,7 @@ std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
              outer);
 }
 
-// Specialization for 2:2
+// Specialization for 2:2 >>= 2:2
 
 template <typename OutputType, typename HiddenType, typename T,
           typename OutputFailureType, typename HiddenFailureType>
@@ -48,5 +52,33 @@ std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
         outer) {
   return inner >> outer;
 }
+
+// Specialization for 2:2 >>= 1:2
+
+template <typename OutputType, typename HiddenType, typename T,
+          typename OutputFailureType, typename HiddenFailureType>
+std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    std::function<
+        Result<OutputType, OutputFailureType>(PartialSuccessResult<HiddenType>)>
+        outer) {
+  return inner >>
+         rbind<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
+}
+
+template <typename OutputType, typename HiddenType, typename T,
+          typename OutputFailureType, typename HiddenFailureType>
+std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
+    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
+    std::function<Result<OutputType, OutputFailureType>(
+        PartialFailureResult<HiddenFailureType>)>
+        outer) {
+  return inner >>
+         rbind<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
+             outer);
+}
+
+// Specialization for 2:1 >>= 2:2
 
 }  // namespace railroad
