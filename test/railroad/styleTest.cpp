@@ -79,6 +79,8 @@ TEST_CASE(">>= works on full func", "[operatorPrecedence]") {
   }));
 }
 
+// 2:2 -> 1:2
+
 TEST_CASE(">>= works on 2:2 -> S:2 func", "[operatorPrecedence]") {
   std::function<Result<int, string>(Result<int, string>)> TwoTwo =
       [](Result<int, string> input) {
@@ -133,6 +135,76 @@ TEST_CASE(">>= works on 2:2 -> F:2 func", "[operatorPrecedence]") {
 
     Result<int, string> implicitChain =
         (TwoTwo >>= FTwo)(Success<int, string>(checkThis));
+
+    REQUIRE(explicitChain.hasFailure());
+    REQUIRE(implicitChain.hasFailure());
+
+    REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+  }));
+}
+
+// 2:1 -> 2:2
+
+TEST_CASE(">>= works on 2:S -> 2:2 func", "[operatorPrecedence]") {
+  std::function<Result<int, string>(Result<int, string>)> TwoTwo =
+      [](Result<int, string> input) {
+        if (input.hasFailure()) {
+          return input;
+        } else {
+          return Success<int, string>(input.getSuccess() + 1);
+        }
+      };
+
+  std::function<PartialSuccessResult<int>(Result<int, string>)> TwoS =
+      [](Result<int, string> in) {
+        if (in.hasFailure()) {
+          return PartialSuccessResult<int>{0};
+        } else {
+          return PartialSuccessResult<int>{in.getSuccess() + 1};
+        }
+      };
+
+  REQUIRE(rc::check([TwoTwo, TwoS](int checkThis) {
+    Result<int, string> explicitChain =
+        (rbind<int, int, string, string>(TwoS) >>
+         TwoTwo)(Success<int, string>(checkThis));
+
+    Result<int, string> implicitChain =
+        (TwoS >>= TwoTwo)(Success<int, string>(checkThis));
+
+    REQUIRE(explicitChain.hasSuccess());
+    REQUIRE(implicitChain.hasSuccess());
+
+    REQUIRE(implicitChain.getSuccess() == explicitChain.getSuccess());
+  }));
+}
+
+TEST_CASE(">>= works on 2:F -> 2:2 func", "[operatorPrecedence]") {
+  std::function<Result<int, string>(Result<int, string>)> TwoTwo =
+      [](Result<int, string> input) {
+        if (input.hasFailure()) {
+          return input;
+        } else {
+          return Success<int, string>(input.getSuccess() + 1);
+        }
+      };
+
+  std::function<PartialFailureResult<string>(Result<int, string>)> TwoF =
+      [](Result<int, string> in) {
+        if (in.hasFailure()) {
+          return PartialFailureResult<string>{"F: " + in.hasFailure()};
+        } else {
+          return PartialFailureResult<string>{"Success, why?"};
+        }
+      };
+
+  REQUIRE(rc::check([TwoTwo, TwoF](int checkThis) {
+    Result<int, string> explicitChain =
+        (rbind<int, int, string, string>(TwoF) >>
+         TwoTwo)(Success<int, string>(checkThis));
+
+    Result<int, string> implicitChain =
+        (TwoF >>= TwoTwo)(Success<int, string>(checkThis));
 
     REQUIRE(explicitChain.hasFailure());
     REQUIRE(implicitChain.hasFailure());

@@ -81,4 +81,28 @@ std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
 
 // Specialization for 2:1 >>= 2:2
 
+template <typename OT, typename HiddenType, typename InputType,
+          typename HiddenFailureType, typename InputFailureType>
+std::function<OT(Result<InputType, InputFailureType>)> operator>>=(
+    std::function<
+        PartialSuccessResult<HiddenType>(Result<InputType, InputFailureType>)>
+        inner,
+    std::function<OT(Result<HiddenType, HiddenFailureType>)> outer) {
+  return rbind<HiddenType, InputType, HiddenFailureType, InputFailureType>(
+             inner) >>
+         outer;
+}
+
+template <typename OT, typename HiddenType, typename InputType,
+          typename HiddenFailureType, typename InputFailureType>
+std::function<OT(Result<InputType, InputFailureType>)> operator>>=(
+    std::function<PartialFailureResult<HiddenFailureType>(
+        Result<InputType, InputFailureType>)>
+        inner,
+    std::function<OT(Result<HiddenType, HiddenFailureType>)> outer) {
+  return rbind<HiddenType, InputType, HiddenFailureType, InputFailureType>(
+             inner) >>
+         outer;
+}
+
 }  // namespace railroad
