@@ -72,29 +72,16 @@ std::function<Result<OutputType, OutputFailureType>(T)> operator>>=(
              outer);
 }
 
-template <typename OutputType, typename HiddenType, typename T,
-          typename OutputFailureType, typename HiddenFailureType>
-std::function<Result<OutputType, OutputFailureType>(T)> bindAndCombine(
-    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
-    std::function<Result<OutputType, OutputFailureType>(
-        Result<HiddenType, HiddenFailureType>)>
-        outer) {
-  return inner >>
-         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
-             outer);
-}
-
-template <typename OutputType, typename HiddenType, typename T,
-          typename OutputFailureType, typename HiddenFailureType,
-          typename OuterFunc>
-std::function<Result<OutputType, OutputFailureType>(T)> bindAndCombine(
-    std::function<Result<HiddenType, HiddenFailureType>(T)> inner,
-    OuterFunc outer) {
-  static_assert(is_instantiation<std::function, OuterFunc>::value,
-                "Need OuterFunc to be an instantiation of std::function");
-  return inner >>
-         bindr<OutputType, HiddenType, OutputFailureType, HiddenFailureType>(
-             outer);
+template <typename InputType, typename InputFailureType>
+std::function<
+    Result<InputType, InputFailureType>(Result<InputType, InputFailureType>)>
+operator>>=(std::function<PartialFailureResult<InputFailureType>(
+                PartialSuccessResult<InputType>)>
+                inner,
+            std::function<PartialFailureResult<InputFailureType>(
+                PartialSuccessResult<InputType>)>
+                outer) {
+  return bindr<InputType, InputType, InputFailureType, InputFailureType>(inner);
 }
 
 }  // namespace railroad

@@ -94,7 +94,7 @@ TEST_CASE(">>= doesn't compile for partialS->S func", "[operatorPrecedence]") {
 }
 */
 
-TEST_CASE(">>= doesn't compile for partialS->F func", "[operatorPrecedence]") {
+TEST_CASE(">>= works on partialS->F func", "[operatorPrecedence]") {
   std::function<PartialFailureResult<std::string>(PartialSuccessResult<int>)>
       adder = [](PartialSuccessResult<int> input) {
         std::stringstream buf;
@@ -103,16 +103,35 @@ TEST_CASE(">>= doesn't compile for partialS->F func", "[operatorPrecedence]") {
       };
 
   // Chasing the simplest failure here
-  std::function<Result<DefaultSuccess, std::string>(Result<int, std::string>)>
-      boundAdder = bindr<DefaultSuccess, std::string, int, std::string>(adder);
+  std::function<Result<int, std::string>(Result<int, std::string>)> boundAdder =
+      bindr<int, std::string>(adder);
 
-  /*  int checkThis = 2;
-    Result<DefaultSuccess, std::string> res =
-        (bindr<DefaultSuccess, std::string, int, std::string>(adder) >>=
-         adder)(Success<int, std::string>(checkThis));
+  REQUIRE(rc::check([boundAdder, adder](int checkThis) {
+    Result<int, std::string> explicitChain =
+        (boundAdder >> bindr(adder) >>
+         bindr(adder))(Success<int, std::string>(checkThis));
 
-    REQUIRE(res.hasFailure());
+    /*
+        Result<int, std::string> preMixedChain =
+            (boundAdder >>=
+             adder >> bindr(adder))(Success<int, std::string>(checkThis));
+
+        Result<int, std::string> postMixedChain =
+            (boundAdder >> bindr(adder) >>=
+             adder)(Success<int, std::string>(checkThis));
     */
+    Result<int, std::string> implicitChain =
+        (boundAdder >>= adder >>= adder)(Success<int, std::string>(checkThis));
+
+    REQUIRE(explicitChain.hasSuccess());
+    // REQUIRE(preMixedChain.hasSuccess());
+    // REQUIRE(postMixedChain.hasSuccess());
+    REQUIRE(implicitChain.hasSuccess());
+
+    REQUIRE(implicitChain.getSuccess() == explicitChain.getSuccess());
+    // REQUIRE(implicitChain.getSuccess() == preMixedChain.getSuccess());
+    // REQUIRE(implicitChain.getSuccess() == postMixedChain.getSuccess());
+  }));
 }
 
 }  // namespace

@@ -70,20 +70,21 @@ bindr(std::function<
   };
 }
 
-template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+template <typename InputType, typename InputFailureType>
 std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+    Result<InputType, InputFailureType>(Result<InputType, InputFailureType>)>
 bindr(std::function<
-      PartialFailureResult<OutputFailureType>(PartialSuccessResult<InputType>)>
+      PartialFailureResult<InputFailureType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
-  static_assert(std::is_same<OutputFailureType, InputFailureType>::value,
+  static_assert(std::is_same<InputType, InputType>::value,
+                "bind SF won't convert output success types");
+  static_assert(std::is_same<InputFailureType, InputFailureType>::value,
                 "bind SF won't convert output failure types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
-      return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
+      return Failure<InputType, InputFailureType>(input.getFailurePartial());
     } else {
-      return Failure<OutputType, OutputFailureType>(
+      return Failure<InputType, InputFailureType>(
           nakedFunc(input.getSuccessPartial()));
     }
   };
