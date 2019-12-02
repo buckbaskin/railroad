@@ -41,6 +41,7 @@ TEST_CASE(">>= works on full func simple", "[operatorPrecedence]") {
 
     REQUIRE(explicitChain.hasSuccess());
     REQUIRE(implicitChain.hasSuccess());
+
     REQUIRE(explicitChain.getSuccess() == implicitChain.getSuccess());
 
     REQUIRE_FALSE(explicitChain.hasFailure());
@@ -55,7 +56,11 @@ TEST_CASE(">>= works on full func simple", "[operatorPrecedence]") {
 
     REQUIRE(explicitChain.hasFailure());
     REQUIRE(implicitChain.hasFailure());
+
     REQUIRE(explicitChain.getFailure() == implicitChain.getFailure());
+
+    REQUIRE_FALSE(explicitChain.hasSuccess());
+    REQUIRE_FALSE(implicitChain.hasSuccess());
   }));
 }
 
@@ -116,6 +121,9 @@ TEST_CASE(">>= works on full func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
     REQUIRE(implicitChain.getFailure() == preMixedChain.getFailure());
     REQUIRE(implicitChain.getFailure() == postMixedChain.getFailure());
+
+    REQUIRE_FALSE(explicitChain.hasSuccess());
+    REQUIRE_FALSE(implicitChain.hasSuccess());
   }));
 }
 
@@ -165,6 +173,9 @@ TEST_CASE(">>= works on 2:2 -> S:2 func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.hasFailure());
 
     REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+
+    REQUIRE_FALSE(explicitChain.hasSuccess());
+    REQUIRE_FALSE(implicitChain.hasSuccess());
   }));
 }
 
@@ -197,6 +208,9 @@ TEST_CASE(">>= works on 2:2 -> F:2 func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.hasFailure());
 
     REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+
+    REQUIRE_FALSE(explicitChain.hasSuccess());
+    REQUIRE_FALSE(implicitChain.hasSuccess());
   }));
 
   REQUIRE(rc::check([TwoTwo, FTwo](string checkThis) {
@@ -211,6 +225,9 @@ TEST_CASE(">>= works on 2:2 -> F:2 func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.hasFailure());
 
     REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+
+    REQUIRE_FALSE(explicitChain.hasSuccess());
+    REQUIRE_FALSE(implicitChain.hasSuccess());
   }));
 }
 
@@ -301,6 +318,9 @@ TEST_CASE(">>= works on 2:F -> 2:2 func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.hasFailure());
 
     REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+
+    REQUIRE_FALSE(explicitChain.hasSuccess());
+    REQUIRE_FALSE(implicitChain.hasSuccess());
   }));
 
   REQUIRE(rc::check([TwoTwo, TwoF](string checkThis) {
@@ -315,6 +335,9 @@ TEST_CASE(">>= works on 2:F -> 2:2 func", "[operatorPrecedence]") {
     REQUIRE(implicitChain.hasFailure());
 
     REQUIRE(implicitChain.getFailure() == explicitChain.getFailure());
+
+    REQUIRE_FALSE(explicitChain.hasSuccess());
+    REQUIRE_FALSE(implicitChain.hasSuccess());
   }));
 }
 
