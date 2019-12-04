@@ -130,34 +130,25 @@ TEST_CASE("bind works on complete func with except", "[bind]") {
 
     std::cout << "Can I build it?" << std::endl;
 
-    auto whatever = full(r);
-
-    std::cout << "Can I call it?" << std::endl;
-
-    auto whatever2 = full(Success<int, ExceptionFailure>(checkThis));
-
-    std::cout << "Can I call it? #2" << std::endl;
-
-    Result<string, ExceptionFailure> fullResult =
-        full(Success<int, ExceptionFailure>(checkThis));
-
-    std::cout << "I got result " << fullResult << std::endl;
-
-    REQUIRE(fullResult.hasFailure());
-    ExceptionFailure normalResult = fullResult.getFailure();
-
-    std::cout << "got normal result" << std::endl;
+    try {
+      Result<string, ExceptionFailure> fullResult =
+          full(Success<int, ExceptionFailure>(checkThis));
+    } catch (const std::out_of_range& /* e */) {
+      std::cout << "Caught exception in naked call" << std::endl;
+    } catch (...) {
+      std::cout << "Sent the wrong exception" << std::endl;
+      REQUIRE(false);
+    }
 
     std::optional<ExceptionFailure> bindResult =
-        (feedS >> rbind(full) >> terminateF)(checkThis);
-
-    std::cout << "got bind result" << std::endl;
+        (feedS >> rbind<string, int, ExceptionFailure, ExceptionFailure,
+                        std::out_of_range>(full) >>
+         terminateF)(checkThis);
 
     REQUIRE(static_cast<bool>(bindResult));
 
-    std::cout << "got past require" << std::endl;
-
-    CHECK(normalResult == *(bindResult));
+    std::out_of_range verifyWithThis("Failure mode");
+    CHECK(ExceptionFailure(verifyWithThis) == *(bindResult));
   }));
 
   std::cout << "Start second test" << std::endl;

@@ -13,7 +13,7 @@ add_compile_options(-Werror)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-add_compile_options(-Wunused-lambda-capture)
+add_compile_options(-fembed-bitcode -Wunused-lambda-capture)
 endif()
 
 set(CHECK_OPTIMIZATIONS FALSE)

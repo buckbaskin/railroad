@@ -31,6 +31,10 @@ rbind(std::function<Result<OutputType, OutputFailureType>(
       return nakedFunc(input);
     } catch (const ExceptionType& e) {
       return Failure<OutputType, OutputFailureType>(e);
+    } catch (...) {
+      std::cout << "ExceptionType didn't match" << std::endl;
+      throw;
+      return Failure<OutputType, OutputFailureType>(OutputFailureType{});
     }
   };
 }
