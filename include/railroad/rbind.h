@@ -31,16 +31,13 @@ rbind(std::function<Result<OutputType, OutputFailureType>(
       return nakedFunc(input);
     } catch (const ExceptionType& e) {
       return Failure<OutputType, OutputFailureType>(e);
-    } catch (...) {
-      std::cout << "ExceptionType didn't match" << std::endl;
-      throw;
-      return Failure<OutputType, OutputFailureType>(OutputFailureType{});
     }
   };
 }
 
 // 1:1
 
+// TODO: exception support for binds. Consider flipping binds/bind dependency
 template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
@@ -52,6 +49,7 @@ rbind(std::function<
       nakedFunc);
 }
 
+// TODO: exception support for bindf. Consider flipping bindf/bind dependency
 template <typename OutputType, typename InputType, typename OutputFailureType,
           typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
@@ -72,8 +70,12 @@ rbind(std::function<
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
-      return Success<InputType, InputFailureType>(
-          nakedFunc(input.getFailurePartial()));
+      try {
+        return Success<InputType, InputFailureType>(
+            nakedFunc(input.getFailurePartial()));
+      } catch (const ExceptionType& e) {
+        return Failure<InputType, InputFailureType>(e);
+      }
     } else {
       return Success<InputType, InputFailureType>(input.getSuccessPartial());
     }
@@ -91,8 +93,12 @@ rbind(std::function<
     if (input.hasFailure()) {
       return Failure<InputType, InputFailureType>(input.getFailurePartial());
     } else {
-      return Failure<InputType, InputFailureType>(
-          nakedFunc(input.getSuccessPartial()));
+      try {
+        return Failure<InputType, InputFailureType>(
+            nakedFunc(input.getSuccessPartial()));
+      } catch (const ExceptionType& e) {
+        return Failure<InputType, InputFailureType>(e);
+      }
     }
   };
 }
@@ -110,7 +116,11 @@ rbind(std::function<
     if (input.hasFailure()) {
       return Failure<OutputType, OutputFailureType>(input.getFailurePartial());
     } else {
-      return nakedFunc(input.getSuccessPartial());
+      try {
+        return nakedFunc(input.getSuccessPartial());
+      } catch (const ExceptionType& e) {
+        return Failure<OutputType, OutputFailureType>(e);
+      }
     }
   };
 }
@@ -124,7 +134,11 @@ rbind(std::function<Result<OutputType, OutputFailureType>(
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
-      return nakedFunc(input.getFailurePartial());
+      try {
+        return nakedFunc(input.getFailurePartial());
+      } catch (const ExceptionType& e) {
+        return Failure<OutputType, OutputFailureType>(e);
+      }
     } else {
       return Success<OutputType, OutputFailureType>(input.getSuccessPartial());
     }
@@ -141,7 +155,11 @@ rbind(std::function<
       PartialSuccessResult<OutputType>(Result<InputType, InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
-    return Success<OutputType, OutputFailureType>(nakedFunc(input));
+    try {
+      return Success<OutputType, OutputFailureType>(nakedFunc(input));
+    } catch (const ExceptionType& e) {
+      return Failure<OutputType, OutputFailureType>(e);
+    }
   };
 }
 
@@ -153,7 +171,11 @@ rbind(std::function<PartialFailureResult<OutputFailureType>(
           Result<InputType, InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
-    return Failure<OutputType, OutputFailureType>(nakedFunc(input));
+    try {
+      return Failure<OutputType, OutputFailureType>(nakedFunc(input));
+    } catch (const ExceptionType& e) {
+      return Failure<OutputType, OutputFailureType>(e);
+    }
   };
 }
 

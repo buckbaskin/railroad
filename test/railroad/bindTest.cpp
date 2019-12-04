@@ -93,26 +93,18 @@ std::ostream& operator<<(std::ostream& out, const ExceptionFailure& ef) {
 }
 
 TEST_CASE("bind works on complete func with except", "[bind]") {
-  std::cout << "started func call" << std::endl;
-
   std::function<Result<string, ExceptionFailure>(Result<int, ExceptionFailure>)>
       full = [](Result<int, ExceptionFailure> r)
       -> Result<string, ExceptionFailure> {
     if (r.hasFailure()) {
-      std::cout << "inside except-full Fmode" << std::endl;
       return Failure<string, ExceptionFailure>(r.getFailure());
     } else {
-      std::cout << "inside except-full Smode" << std::endl;
-      std::cout << r << std::endl;
-      std::cout << "logged result" << std::endl;
       throw std::out_of_range("Test out of range handling");
       std::stringstream buf;
       buf << "Success: " << r.getSuccess();
       return Success<string, ExceptionFailure>(buf.str());
     }
   };
-
-  std::cout << "defined full func" << std::endl;
 
   std::function feedS = ::railroad::helpers::feedSuccess<int, ExceptionFailure>;
   std::function feedF = ::railroad::helpers::feedFailure<int, ExceptionFailure>;
@@ -121,29 +113,25 @@ TEST_CASE("bind works on complete func with except", "[bind]") {
   std::function terminateF =
       ::railroad::helpers::terminateFailure<string, ExceptionFailure>;
 
-  std::cout << "Defined feeds and terminaters" << std::endl;
-
   CHECK(rc::check([feedS, feedF, full, terminateS, terminateF](int checkThis) {
-    std::cout << "start normal result " << checkThis << std::endl;
-
     Result<int, ExceptionFailure> r = Success<int, ExceptionFailure>(checkThis);
-
-    std::cout << "Can I build it?" << std::endl;
 
     try {
       Result<string, ExceptionFailure> fullResult =
           full(Success<int, ExceptionFailure>(checkThis));
     } catch (const std::out_of_range& /* e */) {
-      std::cout << "Caught exception in naked call" << std::endl;
+      CHECK(true);
     } catch (...) {
       std::cout << "Sent the wrong exception" << std::endl;
       REQUIRE(false);
     }
 
-    std::optional<ExceptionFailure> bindResult =
-        (feedS >> rbind<string, int, ExceptionFailure, ExceptionFailure,
-                        std::out_of_range>(full) >>
-         terminateF)(checkThis);
+    std::optional<ExceptionFailure> bindResult;
+    REQUIRE_NOTHROW(bindResult =
+                        (feedS >>
+                         rbind<string, int, ExceptionFailure, ExceptionFailure,
+                               std::out_of_range>(full) >>
+                         terminateF)(checkThis));
 
     REQUIRE(static_cast<bool>(bindResult));
 
@@ -151,15 +139,15 @@ TEST_CASE("bind works on complete func with except", "[bind]") {
     CHECK(ExceptionFailure(verifyWithThis) == *(bindResult));
   }));
 
-  std::cout << "Start second test" << std::endl;
-
   {
     std::out_of_range checkThis("Failure mode");
     ExceptionFailure normalResult =
         full(Failure<int, ExceptionFailure>(ExceptionFailure{checkThis}))
             .getFailure();
-    std::optional<ExceptionFailure> bindResult =
-        (feedF >> rbind(full) >> terminateF)(checkThis);
+
+    std::optional<ExceptionFailure> bindResult;
+    REQUIRE_NOTHROW(bindResult =
+                        (feedF >> rbind(full) >> terminateF)(checkThis));
     REQUIRE(static_cast<bool>(bindResult));
     CHECK(normalResult == *(bindResult));
   };
