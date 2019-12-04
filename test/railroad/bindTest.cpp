@@ -7,6 +7,7 @@
 #include <functional>
 #include <iostream>
 #include <sstream>
+#include <stdexcept>
 #include <string>
 #include "catch2/catch.hpp"
 #include "rapidcheck.h"
@@ -65,6 +66,114 @@ TEST_CASE("bind works on complete func", "[bind]") {
         REQUIRE(normalResult == *(bindResult));
       }));
 }
+
+enum class ExceptionHandled { NO_EXCEPTION, OUT_OF_RANGE };
+struct ExceptionFailure {
+  ExceptionFailure() : ex_(ExceptionHandled::NO_EXCEPTION) {}
+  ExceptionFailure(const std::out_of_range& /* e */)
+      : ex_(ExceptionHandled::OUT_OF_RANGE) {}
+
+  ExceptionHandled ex_;
+};
+
+bool operator==(const ExceptionFailure& a, const ExceptionFailure& b) {
+  return a.ex_ == b.ex_;
+}
+
+std::ostream& operator<<(std::ostream& out, const ExceptionFailure& ef) {
+  out << "ExceptionFailure(";
+  if (ef.ex_ == ExceptionHandled::NO_EXCEPTION) {
+    out << "NO_EXCEPTION";
+  } else if (ef.ex_ == ExceptionHandled::OUT_OF_RANGE) {
+    out << "OUT_OF_RANGE";
+  } else {
+    out << "Invalid";
+  }
+  return out;
+}
+
+TEST_CASE("bind works on complete func with except", "[bind]") {
+  std::cout << "started func call" << std::endl;
+
+  std::function<Result<string, ExceptionFailure>(Result<int, ExceptionFailure>)>
+      full = [](Result<int, ExceptionFailure> r)
+      -> Result<string, ExceptionFailure> {
+    if (r.hasFailure()) {
+      std::cout << "inside except-full Fmode" << std::endl;
+      return Failure<string, ExceptionFailure>(r.getFailure());
+    } else {
+      std::cout << "inside except-full Smode" << std::endl;
+      std::cout << r << std::endl;
+      std::cout << "logged result" << std::endl;
+      throw std::out_of_range("Test out of range handling");
+      std::stringstream buf;
+      buf << "Success: " << r.getSuccess();
+      return Success<string, ExceptionFailure>(buf.str());
+    }
+  };
+
+  std::cout << "defined full func" << std::endl;
+
+  std::function feedS = ::railroad::helpers::feedSuccess<int, ExceptionFailure>;
+  std::function feedF = ::railroad::helpers::feedFailure<int, ExceptionFailure>;
+  std::function terminateS =
+      ::railroad::helpers::terminateSuccess<string, ExceptionFailure>;
+  std::function terminateF =
+      ::railroad::helpers::terminateFailure<string, ExceptionFailure>;
+
+  std::cout << "Defined feeds and terminaters" << std::endl;
+
+  CHECK(rc::check([feedS, feedF, full, terminateS, terminateF](int checkThis) {
+    std::cout << "start normal result " << checkThis << std::endl;
+
+    Result<int, ExceptionFailure> r = Success<int, ExceptionFailure>(checkThis);
+
+    std::cout << "Can I build it?" << std::endl;
+
+    auto whatever = full(r);
+
+    std::cout << "Can I call it?" << std::endl;
+
+    auto whatever2 = full(Success<int, ExceptionFailure>(checkThis));
+
+    std::cout << "Can I call it? #2" << std::endl;
+
+    Result<string, ExceptionFailure> fullResult =
+        full(Success<int, ExceptionFailure>(checkThis));
+
+    std::cout << "I got result " << fullResult << std::endl;
+
+    REQUIRE(fullResult.hasFailure());
+    ExceptionFailure normalResult = fullResult.getFailure();
+
+    std::cout << "got normal result" << std::endl;
+
+    std::optional<ExceptionFailure> bindResult =
+        (feedS >> rbind(full) >> terminateF)(checkThis);
+
+    std::cout << "got bind result" << std::endl;
+
+    REQUIRE(static_cast<bool>(bindResult));
+
+    std::cout << "got past require" << std::endl;
+
+    CHECK(normalResult == *(bindResult));
+  }));
+
+  std::cout << "Start second test" << std::endl;
+
+  {
+    std::out_of_range checkThis("Failure mode");
+    ExceptionFailure normalResult =
+        full(Failure<int, ExceptionFailure>(ExceptionFailure{checkThis}))
+            .getFailure();
+    std::optional<ExceptionFailure> bindResult =
+        (feedF >> rbind(full) >> terminateF)(checkThis);
+    REQUIRE(static_cast<bool>(bindResult));
+    CHECK(normalResult == *(bindResult));
+  };
+}
+
 }  // namespace TwoTwo
 
 // 1:1

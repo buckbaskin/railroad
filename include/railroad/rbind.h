@@ -1,5 +1,5 @@
 /*
- * bind.h
+ * rbind.h
  *
  * Copyright 2019 Buck Baskin
  */
@@ -20,13 +20,19 @@ namespace railroad {
 // 2:2
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+          typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<Result<OutputType, OutputFailureType>(
           Result<InputType, InputFailureType>)>
           nakedFunc) {
-  return nakedFunc;
+  return [nakedFunc](Result<InputType, InputFailureType> input) {
+    try {
+      return nakedFunc(input);
+    } catch (const ExceptionType& e) {
+      return Failure<OutputType, OutputFailureType>(e);
+    }
+  };
 }
 
 // 1:1
