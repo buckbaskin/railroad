@@ -42,7 +42,7 @@ rbind(std::function<Result<OutputType, OutputFailureType>(
 // 1:1
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+          typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<
@@ -53,7 +53,7 @@ rbind(std::function<
 }
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+          typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<PartialFailureResult<OutputFailureType>(
@@ -63,33 +63,30 @@ rbind(std::function<PartialFailureResult<OutputFailureType>(
       nakedFunc);
 }
 
-template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+template <typename InputType, typename InputFailureType,
+          typename ExceptionType = InputFailureType>
 std::function<
-    Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
+    Result<InputType, InputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<
-      PartialSuccessResult<OutputType>(PartialFailureResult<InputFailureType>)>
+      PartialSuccessResult<InputType>(PartialFailureResult<InputFailureType>)>
           nakedFunc) {
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
-      return Success<OutputType, OutputFailureType>(
+      return Success<InputType, InputFailureType>(
           nakedFunc(input.getFailurePartial()));
     } else {
-      return Success<OutputType, OutputFailureType>(input.getSuccessPartial());
+      return Success<InputType, InputFailureType>(input.getSuccessPartial());
     }
   };
 }
 
-template <typename InputType, typename InputFailureType>
+template <typename InputType, typename InputFailureType,
+          typename ExceptionType = InputFailureType>
 std::function<
     Result<InputType, InputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<
       PartialFailureResult<InputFailureType>(PartialSuccessResult<InputType>)>
           nakedFunc) {
-  static_assert(std::is_same<InputType, InputType>::value,
-                "bind SF won't convert output success types");
-  static_assert(std::is_same<InputFailureType, InputFailureType>::value,
-                "bind SF won't convert output failure types");
   return [nakedFunc](Result<InputType, InputFailureType> input) {
     if (input.hasFailure()) {
       return Failure<InputType, InputFailureType>(input.getFailurePartial());
@@ -103,7 +100,7 @@ rbind(std::function<
 // 1 : 2
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+          typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<
@@ -119,7 +116,7 @@ rbind(std::function<
 }
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+          typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<Result<OutputType, OutputFailureType>(
@@ -137,7 +134,7 @@ rbind(std::function<Result<OutputType, OutputFailureType>(
 // 2:1
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+          typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<
@@ -149,7 +146,7 @@ rbind(std::function<
 }
 
 template <typename OutputType, typename InputType, typename OutputFailureType,
-          typename InputFailureType>
+          typename InputFailureType, typename ExceptionType = OutputFailureType>
 std::function<
     Result<OutputType, OutputFailureType>(Result<InputType, InputFailureType>)>
 rbind(std::function<PartialFailureResult<OutputFailureType>(

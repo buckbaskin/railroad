@@ -278,8 +278,7 @@ TEST_CASE("bind works on partialFS func", "[bind]") {
   REQUIRE(rc::check([feedF, half, terminateS](int checkThis) {
     string normalResult = half(PartialFailureResult(checkThis)).unpack();
     std::optional<string> bindResult =
-        (feedF >> rbind<string, string, int, int>(half) >>
-         terminateS)(checkThis);
+        (feedF >> rbind<string, int>(half) >> terminateS)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
@@ -287,8 +286,7 @@ TEST_CASE("bind works on partialFS func", "[bind]") {
   REQUIRE(rc::check([feedS, half, terminateS](string checkThis) {
     string normalResult = checkThis;
     std::optional<string> bindResult =
-        (feedS >> rbind<string, string, int, int>(half) >>
-         terminateS)(checkThis);
+        (feedS >> rbind<string, int>(half) >> terminateS)(checkThis);
     REQUIRE(static_cast<bool>(bindResult));
     REQUIRE(normalResult == *(bindResult));
   }));
