@@ -3,7 +3,8 @@ cat compile.bash
 
 mkdir -p build/ &&\
 cd build/ &&\
-CXX=clang++-6.0 CC=clang-6.0 cmake .. &&\
-cmake --build . &&\
+CXX=/usr/bin/clang++-8 CC=clang-8 cmake .. &&\
+make -j4 &&\
+# cmake --build . &&\
 cd ..
 

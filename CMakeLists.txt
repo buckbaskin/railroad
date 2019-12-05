@@ -13,6 +13,8 @@ add_compile_options(-Werror)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 endif()
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+# Added so that rapidcheck can build on Clang-10
+# add_compile_options(-Wno-implicit-int-float-conversion)
 add_compile_options(-fembed-bitcode -Wunused-lambda-capture)
 endif()
 
